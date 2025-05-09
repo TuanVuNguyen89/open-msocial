@@ -12,10 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendRequestResponse {
-    private String id;
-    private UserProfileResponse sender;
-    private UserProfileResponse receiver;
-    private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String status;      // PENDING, ACCEPTED, REJECTED, ALREADY_FRIENDS, NOT_FOUND
+    private String message;
+    private String targetUserId;
 }

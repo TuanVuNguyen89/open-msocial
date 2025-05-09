@@ -1,15 +1,17 @@
 package com.devteria.profile.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.*;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
+import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
 
 @Getter
 @Setter
@@ -33,4 +35,13 @@ public class UserProfile {
     String lastName;
     LocalDate dob;
     String city;
+
+    @Relationship(type = "FRIEND_WITH", direction = OUTGOING)
+    private Set<UserProfile> friends = new HashSet<>();
+
+    @Relationship(type = "FRIEND_REQUEST", direction = OUTGOING)
+    private Set<FriendRequestRelationship> sentFriendRequests = new HashSet<>();
+
+    @Relationship(type = "FRIEND_REQUEST", direction = INCOMING)
+    private Set<FriendRequestRelationship> receivedFriendRequests = new HashSet<>();
 }

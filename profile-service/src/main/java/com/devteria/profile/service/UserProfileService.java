@@ -3,7 +3,9 @@ package com.devteria.profile.service;
 import java.util.List;
 
 import com.devteria.profile.dto.request.ProfileUpdateRequest;
+import com.devteria.profile.repository.FollowRelationshipRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserProfileService {
     UserProfileRepository userProfileRepository;
     UserProfileMapper userProfileMapper;
+    FollowRelationshipRepository followRelationshipRepository;
 
     /**
      * Create a new user profile
@@ -113,5 +116,98 @@ public class UserProfileService {
 
         userProfile = userProfileRepository.save(userProfile);
         return userProfileMapper.toUserProfileReponse(userProfile);
+    }
+
+    /**
+     * Follow another user
+     * @param targetUserId ID of user to follow
+     * @return true if successful
+     */
+    public boolean followUser(String targetUserId) {
+        UserProfile currentUser = getUserProfileByUserId(getCurrentUserId());
+        UserProfile targetUser = getUserProfileById(targetUserId);
+
+        // Don't allow following yourself
+        if (currentUser.getId().equals(targetUserId)) {
+            return false;
+        }
+
+        // Check if already following
+        if (followRelationshipRepository.checkFollowRelationship(currentUser.getId(), targetUserId)) {
+            return true; // Already following, consider it success
+        }
+
+        // Create FOLLOWS relationship using Cypher query
+        return followRelationshipRepository.createFollowRelationship(currentUser.getId(), targetUserId);
+    }
+
+    /**
+     * Unfollow a user
+     * @param targetUserId ID of user to unfollow
+     * @return true if successful
+     */
+    public boolean unfollowUser(String targetUserId) {
+        UserProfile currentUser = getUserProfileByUserId(getCurrentUserId());
+        UserProfile targetUser = getUserProfileById(targetUserId);
+
+        // Don't allow unfollowing yourself
+        if (currentUser.getId().equals(targetUserId)) {
+            return false;
+        }
+
+        // Check if actually following
+        if (!followRelationshipRepository.checkFollowRelationship(currentUser.getId(), targetUserId)) {
+            return false; // Not following, consider it success
+        }
+
+        // Delete FOLLOWS relationship using Cypher query
+        return followRelationshipRepository.removeFollowRelationship(currentUser.getId(), targetUserId);
+    }
+
+    /**
+     * Get user profile by ID
+     * @param id User profile ID
+     * @return User profile
+     */
+    public UserProfile getUserProfileById(String id) {
+        return userProfileRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    /**
+     * Get user profile by userId (from Auth)
+     * @param userId User ID from Auth system
+     * @return User profile
+     */
+    public UserProfile getUserProfileByUserId(String userId) {
+        return userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    /**
+     * Get the current authenticated user ID
+     * @return current user ID from security context
+     */
+    private String getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
+    /**
+     * Convert User Profile entity to DTO
+     * @param userProfile User profile entity
+     * @return User profile DTO
+     */
+    public UserProfile convertToDto(UserProfile userProfile) {
+        return UserProfile.builder()
+                .id(userProfile.getId())
+                .userId(userProfile.getUserId())
+                .username(userProfile.getUsername())
+                .email(userProfile.getEmail())
+                .firstName(userProfile.getFirstName())
+                .lastName(userProfile.getLastName())
+                .dob(userProfile.getDob())
+                .city(userProfile.getCity())
+                .build();
     }
 }
