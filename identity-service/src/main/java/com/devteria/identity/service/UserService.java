@@ -67,7 +67,7 @@ public class UserService {
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("EMAIL")
                 .recipient(request.getEmail())
-                .subject("Welcome to bookteria")
+                .subject("Welcome to Open MSocial")
                 .body("Hello, " + request.getUsername())
                 .build();
 
