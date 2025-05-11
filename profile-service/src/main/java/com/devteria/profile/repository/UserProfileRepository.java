@@ -1,6 +1,7 @@
 package com.devteria.profile.repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,7 @@ import com.devteria.profile.entity.UserProfile;
 public interface UserProfileRepository extends Neo4jRepository<UserProfile, String> {
 
     Optional<UserProfile> findByUserId(String userId);
+    Optional<UserProfile> findById(String Id);
 
     /**
      * Find if two users are friends
@@ -40,6 +42,16 @@ public interface UserProfileRepository extends Neo4jRepository<UserProfile, Stri
             countQuery = "MATCH (u:user_profile {id: $userId})-[:FRIEND_WITH]-(friend:user_profile) RETURN count(DISTINCT friend)"
     )
     Page<UserProfile> findFriendsOfUser(@Param("userId") String userId, Pageable pageable);
+
+    /**
+     * Find all friends of a user
+     * @param userId user ID
+     * @return list of user profiles
+     */
+    @Query("MATCH (u:user_profile {id: $userId})-[:FRIEND_WITH]-(friend:user_profile) " +
+            "RETURN DISTINCT friend")
+    ArrayList<UserProfile> findFriendsOfUser(@Param("userId") String userId);
+
 
 
 
