@@ -1,0 +1,4 @@
+package com.devteria.media_service.service;
+
+public class CloudinaryServiceImpl {
+}
