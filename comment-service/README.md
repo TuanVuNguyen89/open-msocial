@@ -66,53 +66,7 @@ public interface CommentService {
     - Trả về tất cả reply có cùng rootId
     - Client sẽ dựng lại cây reply từ flat list (theo id và parentId)
 
-### 2. UserClient (Interservice Communication)
-
-Dùng để lấy thông tin người dùng (user, pUser) từ User Service.
-
-```java
-public interface UserClient {
-    UserProfileResponse getUserProfile(String userId);
-}
-```
-
 Có thể dùng WebClient hoặc OpenFeign để gọi User Service.
-
-### 3. CommentMapper
-
-Chuyển đổi giữa Comment và CommentResponse.
-
-```java
-public class CommentMapper {
-    public CommentResponse toResponse(Comment comment, UserProfileResponse user, UserProfileResponse pUser) {
-        // map dữ liệu + return
-    }
-}
-```
-
-## 🔁 Messaging Integration (Kafka)
-
-(Tùy chọn) Sau khi tạo comment, gửi sự kiện qua Kafka topic:
-- **NotifyService** → để tạo thông báo cho pUser
-- **FeedService** → để cập nhật trạng thái bài viết
-
-```json
-{
-  "type": "NEW_COMMENT",
-  "postId": "...",
-  "commentId": "...",
-  "fromUserId": "...",
-  "toUserId": "...", // pUserId nếu là reply
-  "timestamp": "..."
-}
-```
-
-## ⚠️ Các lưu ý triển khai
-
-- Dữ liệu flat dễ phân trang, tránh lỗi JSON stack overflow khi lồng quá sâu.
-- rootId giúp truy xuất toàn bộ chuỗi bình luận trong một bài viết nhanh chóng.
-- pUserId giúp hiển thị "Reply to user X" và gửi thông báo chính xác.
-- Nếu dùng MongoDB, nên tạo chỉ mục cho postId, rootId để tối ưu hiệu năng truy vấn.
 
 ## 📎 API gợi ý
 
@@ -123,36 +77,3 @@ public class CommentMapper {
 | GET | /comments/root/{rootId} | Lấy toàn bộ replies cùng root |
 | PUT | /comments/{id} | Cập nhật comment |
 | DELETE | /comments/{id} | Xoá comment (nếu là chủ comment) |
-
-## 📐 Cấu trúc gợi ý
-
-```
-comment-service/
-├── controller/
-│   └── CommentController.java
-├── service/
-│   └── CommentService.java
-│   └── CommentServiceImpl.java
-├── client/
-│   └── UserClient.java
-├── dto/
-│   └── CreateCommentRequest.java
-│   └── UpdateCommentRequest.java
-│   └── CommentResponse.java
-├── model/
-│   └── Comment.java
-├── mapper/
-│   └── CommentMapper.java
-└── repository/
-    └── CommentRepository.java
-```
-
-## 📊 Truy vấn mẫu MongoDB
-
-```javascript
-// Lấy comment gốc theo post
-db.comments.find({ postId: "xyz", rootId: { $exists: false } })
-
-// Lấy replies theo rootId
-db.comments.find({ rootId: "abc" }).sort({ createdAt: 1 })
-```
