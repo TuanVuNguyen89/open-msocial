@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -269,6 +270,15 @@ public class FriendRelationshipService {
 
         return userProfileRepository.findFriendsOfUser(userId, pageable)
                 .map(userProfileService::convertToDto);
+    }
+
+    /**
+     * Get all friends of a user
+     * @param id ID of the user
+     * @return Page of user profile DTOs
+     */
+    public ArrayList<UserProfile> getUserFriends(String id) {
+        return userProfileRepository.findFriendsOfUser(id);
     }
 
     /**
