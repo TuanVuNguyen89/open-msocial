@@ -1,0 +1,4 @@
+package com.devteria.media_service.exception;
+
+public class MediaUploadException {
+}

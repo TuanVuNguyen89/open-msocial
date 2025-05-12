@@ -1,0 +1,35 @@
+package com.devteria.media_service.exception;
+
+public class CustomException {
+    // Base class for custom exceptions
+    public abstract class MediaServiceException extends RuntimeException {
+        public MediaServiceException(String message) {
+            super(message);
+        }
+    }
+
+    // Specific exceptions
+    public class MediaUploadException extends MediaServiceException {
+        public MediaUploadException(String message) {
+            super(message);
+        }
+    }
+
+    public class MediaNotFoundException extends MediaServiceException {
+        public MediaNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public class MediaDeletionException extends MediaServiceException {
+        public MediaDeletionException(String message) {
+            super(message);
+        }
+    }
+
+    public class MediaStreamingException extends MediaServiceException {
+        public MediaStreamingException(String message) {
+            super(message);
+        }
+    }
+}
