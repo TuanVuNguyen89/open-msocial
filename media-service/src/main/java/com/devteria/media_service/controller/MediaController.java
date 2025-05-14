@@ -1,69 +1,75 @@
 package com.devteria.media_service.controller;
 
 import com.devteria.media_service.dto.*;
-import com.devteria.media_service.dto.request.MetadataUpdateRequest;
 import com.devteria.media_service.dto.response.MediaResponse;
 import com.devteria.media_service.dto.response.MediaUploadResponse;
+import com.devteria.media_service.entity.Media;
 import com.devteria.media_service.service.MediaService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
+
 @RestController
-@RequestMapping("/api/media")
+@RequiredArgsConstructor
+@RequestMapping
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MediaController {
 
-    @Autowired
-    private MediaService mediaService;
+    MediaService mediaService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadMedia(
+    public ApiResponse<MediaUploadResponse> uploadMedia(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("ownerType") String ownerType,
-            @RequestParam("ownerId") String ownerId  //Expect that the ownerId will be guid
+            @RequestParam("postId") String postId
     ) {
-        MediaUploadResponse response = mediaService.upload(file, ownerType, ownerId);
-        ApiResponse<MediaUploadResponse> apiResponse = ApiResponse.<MediaUploadResponse>builder()
-                .result(response)
+        return ApiResponse.<MediaUploadResponse>builder()
+                .result(mediaService.upload(file, postId))
                 .message("Media uploaded successfully")
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MediaResponse>> getMedia(@PathVariable String id) {
-        MediaResponse media = mediaService.getMediaById(id);
-        ApiResponse<MediaResponse> apiResponse = ApiResponse.<MediaResponse>builder()
-                .result(media)
+    public ApiResponse<MediaResponse> getMedia(@PathVariable String id) {
+        return ApiResponse.<MediaResponse>builder()
+                .result(mediaService.getMediaById(id))
                 .message("Media retrieved successfully")
                 .build();
-        return ResponseEntity.ok(apiResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteMedia(@PathVariable String id) {
-        mediaService.deleteMedia(id);
-        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+    public ApiResponse<Boolean> deleteMedia(@PathVariable String id) {
+        return ApiResponse.<Boolean>builder()
+                .result(mediaService.deleteMedia(id))
                 .message("Media deleted successfully")
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT); // or HttpStatus.OK
     }
 
-    @PutMapping("/{id}/metadata")
-    public ResponseEntity<ApiResponse<Void>> updateMetadata(@PathVariable String id, @RequestBody MetadataUpdateRequest metadataUpdateRequest) {
-        mediaService.updateMetadata(id, metadataUpdateRequest.getMetadata());
-        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
-                .message("Metadata updated successfully")
+    /**
+     * Endpoint để tải xuống media với tên file gốc
+     */
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadMedia(@PathVariable String id) {
+        return mediaService.downloadMedia(id);
+    }
+
+    /**
+     * Endpoint xem trước media (không tải xuống)
+     */
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> viewMedia(@PathVariable String id) {
+        MediaResponse media = mediaService.getMediaById(id);
+        // Chuyển hướng đến URL Cloudinary
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(media.getUrl()))
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping(value = "/stream/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<byte[]> streamMedia(@PathVariable String id) {
-        byte[] mediaStream = mediaService.streamMedia(id);
-        return ResponseEntity.ok(mediaStream); //Streaming media returns byte[] directly
     }
 }

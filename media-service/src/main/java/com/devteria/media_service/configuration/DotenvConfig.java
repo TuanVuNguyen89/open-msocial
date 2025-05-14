@@ -1,4 +1,4 @@
-package com.devteria.media_service.config;
+package com.devteria.media_service.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

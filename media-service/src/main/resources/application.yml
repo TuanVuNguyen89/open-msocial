@@ -1,5 +1,7 @@
 server:
   port: 8085
+  servlet:
+    context-path: /media
 
 cloudinary:
   cloud_name: ${CLOUDINARY_CLOUD_NAME}
@@ -10,11 +12,21 @@ spring:
   application:
     name: media-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/media_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/oms_media}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:12345678}
+    password: ${SPRING_DATASOURCE_PASSWORD:123456}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+app:
+  services:
+    profile:
+      url: http://localhost:8081/profile
+    post:
+      url: http://localhost:8083/post

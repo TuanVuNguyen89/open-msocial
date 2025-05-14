@@ -2,13 +2,19 @@ package com.devteria.media_service.entity;
 
 import com.devteria.media_service.entity.MapToJsonConverter;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "media")
 @Data
 public class Media {
@@ -17,38 +23,30 @@ public class Media {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "id", columnDefinition = "VARCHAR(255)")
-    private String id;
+    String id;
 
     @Column(nullable = false)
-    private String url;
+    String url;
 
     @Column(name = "public_id", nullable = false)
-    private String publicId;
+    String publicId;
 
-    @Column(nullable = false)
-    private String type; // IMAGE, VIDEO
+    String type; // IMAGE, VIDEO, PDF, AUDIO, TEXT, DOCUMENT, etc.
 
-    @Column(nullable = false)
-    private String format;
+    String format; // jpg, png, mp4, pdf, etc.
 
-    @Column(nullable = false)
-    private Long size;
+    Long size;
+    Integer width;      // For images and videos
+    Integer height;     // For images and videos
+    Integer duration;   // For audio and video (in seconds)
+    String originalFilename;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    Instant createdAt;
 
-    @Column(name = "updated_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    @Column(name = "user_id", nullable = false)
+    String userId;
 
-    @Column(name = "metadata", columnDefinition = "TEXT") // For storing JSON
-    @Convert(converter = MapToJsonConverter.class) // Use the converter
-    private Map<String, Object> metadata;
-
-    @Column(name = "owner_type", nullable = false)
-    private String ownerType; // POST, AVATAR
-
-    @Column(name = "owner_id", nullable = false)
-    private String ownerId;
+    @Column(name = "post_id", nullable = false)
+    String postId;
 }
