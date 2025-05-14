@@ -2,19 +2,19 @@ package com.devteria.profile.service;
 
 import java.util.List;
 
-import com.devteria.profile.dto.request.ProfileUpdateRequest;
-import com.devteria.profile.repository.FollowRelationshipRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.devteria.profile.dto.request.ProfileCreationRequest;
+import com.devteria.profile.dto.request.ProfileUpdateRequest;
 import com.devteria.profile.dto.response.UserProfileResponse;
 import com.devteria.profile.entity.UserProfile;
 import com.devteria.profile.exception.AppException;
 import com.devteria.profile.exception.ErrorCode;
 import com.devteria.profile.mapper.UserProfileMapper;
+import com.devteria.profile.repository.FollowRelationshipRepository;
 import com.devteria.profile.repository.UserProfileRepository;
 
 import lombok.AccessLevel;
@@ -87,8 +87,8 @@ public class UserProfileService {
     }
 
     public UserProfileResponse updateProfile(String id, ProfileUpdateRequest request) {
-        UserProfile userProfile = userProfileRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserProfile userProfile =
+                userProfileRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Verify current user is owner of this profile or admin
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -170,8 +170,7 @@ public class UserProfileService {
      * @return User profile
      */
     public UserProfile getUserProfileById(String id) {
-        return userProfileRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userProfileRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     /**
@@ -180,7 +179,8 @@ public class UserProfileService {
      * @return User profile
      */
     public UserProfile getUserProfileByUserId(String userId) {
-        return userProfileRepository.findByUserId(userId)
+        return userProfileRepository
+                .findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 

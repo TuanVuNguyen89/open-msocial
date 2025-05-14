@@ -2,11 +2,11 @@ package com.devteria.profile.controller;
 
 import java.util.List;
 
-import com.devteria.profile.dto.request.ProfileUpdateRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.devteria.profile.dto.ApiResponse;
+import com.devteria.profile.dto.request.ProfileUpdateRequest;
 import com.devteria.profile.dto.response.UserProfileResponse;
 import com.devteria.profile.service.UserProfileService;
 
@@ -57,8 +57,7 @@ public class UserProfileController {
      */
     @PutMapping("/{id}")
     public ApiResponse<UserProfileResponse> updateProfile(
-            @PathVariable String id,
-            @RequestBody ProfileUpdateRequest request) {
+            @PathVariable String id, @RequestBody ProfileUpdateRequest request) {
         return ApiResponse.<UserProfileResponse>builder()
                 .result(userProfileService.updateProfile(id, request))
                 .build();

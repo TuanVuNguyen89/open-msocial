@@ -19,8 +19,7 @@ public enum ErrorCode {
     FRIEND_REQUEST_ALREADY_SENT(1009, "Friend request already sent", HttpStatus.BAD_REQUEST),
     ALREADY_FRIENDS(1010, "Already friends", HttpStatus.BAD_REQUEST),
     FRIEND_REQUEST_NOT_FOUND(1011, "Friend request not found", HttpStatus.BAD_REQUEST),
-    FRIEND_REQUEST_ALREADY_PROCESSED(1012, "Friend request already processed", HttpStatus.BAD_REQUEST)
-    ;
+    FRIEND_REQUEST_ALREADY_PROCESSED(1012, "Friend request already processed", HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

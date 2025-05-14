@@ -1,5 +1,12 @@
 package com.devteria.comment.service;
 
+import java.time.Instant;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.devteria.comment.Mapper.CommentMapper;
 import com.devteria.comment.dto.request.CommentCreationRequest;
 import com.devteria.comment.dto.request.CommentUpdateRequest;
@@ -12,19 +19,11 @@ import com.devteria.comment.exception.AppException;
 import com.devteria.comment.exception.ErrorCode;
 import com.devteria.comment.repository.CommentRepository;
 import com.devteria.comment.repository.httpclient.ProfileClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +35,7 @@ public class CommentService {
     CommentMapper commentMapper;
 
     Comment getById(String id) {
-        return commentRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+        return commentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
     }
 
     public CommentResponse createComment(CommentCreationRequest request) {
@@ -132,7 +130,6 @@ public class CommentService {
         var commentResponses = commentsPage.map(this::mapToResponse);
         return PageResponseDTO.from(commentResponses);
     }
-
 
     // Extension
     private String getCurrentUserId() {

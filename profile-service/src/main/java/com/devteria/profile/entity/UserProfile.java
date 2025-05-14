@@ -1,5 +1,8 @@
 package com.devteria.profile.entity;
 
+import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
+import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,9 +12,6 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
-import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
 
 @Getter
 @Setter

@@ -1,12 +1,13 @@
 package com.devteria.comment.repository.httpclient;
 
-import com.devteria.comment.dto.ApiResponse;
-import com.devteria.comment.dto.response.UserProfileResponse;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
+import com.devteria.comment.dto.ApiResponse;
+import com.devteria.comment.dto.response.UserProfileResponse;
 
 @FeignClient(name = "profile-service", url = "${app.services.profile.url}")
 public interface ProfileClient {

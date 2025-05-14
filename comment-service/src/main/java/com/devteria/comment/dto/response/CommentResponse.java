@@ -15,4 +15,3 @@ public class CommentResponse {
     private UserProfileResponse pUser;
     private String rootId;
 }
-

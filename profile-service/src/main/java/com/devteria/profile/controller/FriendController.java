@@ -1,19 +1,18 @@
 package com.devteria.profile.controller;
 
-import com.devteria.profile.dto.ApiResponse;
-import com.devteria.profile.dto.response.FriendRequestResponse;
-import com.devteria.profile.dto.response.UserProfileResponse;
-import com.devteria.profile.entity.UserProfile;
-import com.devteria.profile.service.FriendRelationshipService;
-import com.devteria.profile.service.UserProfileService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.devteria.profile.dto.ApiResponse;
+import com.devteria.profile.dto.response.FriendRequestResponse;
+import com.devteria.profile.entity.UserProfile;
+import com.devteria.profile.service.FriendRelationshipService;
+import com.devteria.profile.service.UserProfileService;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,9 +85,7 @@ public class FriendController {
      * Get list of friends
      */
     @GetMapping("/{userId}/friends")
-    public ApiResponse<Page<UserProfile>> getUserFriends(
-            @PathVariable String userId,
-            Pageable pageable) {
+    public ApiResponse<Page<UserProfile>> getUserFriends(@PathVariable String userId, Pageable pageable) {
         return ApiResponse.<Page<UserProfile>>builder()
                 .result(friendRelationshipService.getUserFriends(userId, pageable))
                 .build();
@@ -98,9 +95,7 @@ public class FriendController {
      * Get list of followers
      */
     @GetMapping("/{userId}/followers")
-    public ApiResponse<Page<UserProfile>> getUserFollowers(
-            @PathVariable String userId,
-            Pageable pageable) {
+    public ApiResponse<Page<UserProfile>> getUserFollowers(@PathVariable String userId, Pageable pageable) {
         return ApiResponse.<Page<UserProfile>>builder()
                 .result(friendRelationshipService.getUserFollowers(userId, pageable))
                 .build();
@@ -110,9 +105,7 @@ public class FriendController {
      * Get list of users being followed
      */
     @GetMapping("/{userId}/following")
-    public ApiResponse<Page<UserProfile>> getUserFollowing(
-            @PathVariable String userId,
-            Pageable pageable) {
+    public ApiResponse<Page<UserProfile>> getUserFollowing(@PathVariable String userId, Pageable pageable) {
         return ApiResponse.<Page<UserProfile>>builder()
                 .result(friendRelationshipService.getUserFollowing(userId, pageable))
                 .build();

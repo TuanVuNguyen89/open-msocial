@@ -1,6 +1,5 @@
 package com.devteria.comment.dto.request;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

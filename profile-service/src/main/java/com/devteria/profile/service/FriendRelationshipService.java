@@ -1,5 +1,16 @@
 package com.devteria.profile.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.devteria.profile.dto.response.FriendRequestResponse;
 import com.devteria.profile.entity.FriendRequestRelationship;
 import com.devteria.profile.entity.UserProfile;
@@ -8,20 +19,11 @@ import com.devteria.profile.exception.ErrorCode;
 import com.devteria.profile.mapper.UserProfileMapper;
 import com.devteria.profile.repository.FriendRequestRepository;
 import com.devteria.profile.repository.UserProfileRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,8 @@ public class FriendRelationshipService {
     public FriendRequestResponse sendFriendRequest(String targetUserId) {
         // Get sender (current user) and receiver profiles
         UserProfile sender = getCurrentUserProfile();
-        UserProfile receiver = userProfileRepository.findById(targetUserId)
+        UserProfile receiver = userProfileRepository
+                .findById(targetUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Check if users are already friends
@@ -68,7 +71,8 @@ public class FriendRelationshipService {
 
         // Check if there's a pending request from target user to current user
         Optional<FriendRequestRelationship> incomingRequest = sender.getReceivedFriendRequests().stream()
-                .filter(req -> req.getReceiver().getId().equals(receiver.getId()) && req.getStatus().equals("PENDING"))
+                .filter(req -> req.getReceiver().getId().equals(receiver.getId())
+                        && req.getStatus().equals("PENDING"))
                 .findFirst();
 
         if (incomingRequest.isPresent()) {
@@ -100,12 +104,14 @@ public class FriendRelationshipService {
      */
     public FriendRequestResponse acceptFriendRequest(String senderUserId) {
         UserProfile currentUser = getCurrentUserProfile();
-        UserProfile sourceUser = userProfileRepository.findById(senderUserId)
+        UserProfile sourceUser = userProfileRepository
+                .findById(senderUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Find the pending request
         Optional<FriendRequestRelationship> pendingRequest = currentUser.getReceivedFriendRequests().stream()
-                .filter(req -> req.getReceiver().getId().equals(sourceUser.getId()) && req.getStatus().equals("PENDING"))
+                .filter(req -> req.getReceiver().getId().equals(sourceUser.getId())
+                        && req.getStatus().equals("PENDING"))
                 .findFirst();
 
         if (pendingRequest.isEmpty()) {
@@ -150,12 +156,14 @@ public class FriendRelationshipService {
      */
     public FriendRequestResponse rejectFriendRequest(String sourceUserId) {
         UserProfile currentUser = getCurrentUserProfile();
-        UserProfile sourceUser = userProfileRepository.findById(sourceUserId)
+        UserProfile sourceUser = userProfileRepository
+                .findById(sourceUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Find the pending request
         Optional<FriendRequestRelationship> pendingRequest = currentUser.getReceivedFriendRequests().stream()
-                .filter(req -> req.getReceiver().getId().equals(sourceUser.getId()) && req.getStatus().equals("PENDING"))
+                .filter(req -> req.getReceiver().getId().equals(sourceUser.getId())
+                        && req.getStatus().equals("PENDING"))
                 .findFirst();
 
         if (pendingRequest.isEmpty()) {
@@ -188,7 +196,8 @@ public class FriendRelationshipService {
      */
     public boolean removeFriend(String targetUserId) {
         UserProfile currentUser = getCurrentUserProfile();
-        UserProfile targetUser = userProfileRepository.findById(targetUserId)
+        UserProfile targetUser = userProfileRepository
+                .findById(targetUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Check if they are friends
@@ -232,7 +241,8 @@ public class FriendRelationshipService {
      */
     private UserProfile getCurrentUserProfile() {
         String userId = getCurrentUserId();
-        return userProfileRepository.findByUserId(userId)
+        return userProfileRepository
+                .findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
@@ -264,12 +274,11 @@ public class FriendRelationshipService {
         // Check if accessing own friends or if permission allows viewing others' friends
         String currentUserId = getCurrentUserProfile().getId();
         if (!userId.equals(currentUserId)) {
-            //throw new AppException(ErrorCode.USER_NOT_EXISTED);
-            //handle later
+            // throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            // handle later
         }
 
-        return userProfileRepository.findFriendsOfUser(userId, pageable)
-                .map(userProfileService::convertToDto);
+        return userProfileRepository.findFriendsOfUser(userId, pageable).map(userProfileService::convertToDto);
     }
 
     /**
@@ -288,8 +297,7 @@ public class FriendRelationshipService {
      * @return Page of user profile DTOs
      */
     public Page<UserProfile> getUserFollowers(String userId, Pageable pageable) {
-        return userProfileRepository.findFollowersOfUser(userId, pageable)
-                .map(userProfileService::convertToDto);
+        return userProfileRepository.findFollowersOfUser(userId, pageable).map(userProfileService::convertToDto);
     }
 
     /**
@@ -299,8 +307,7 @@ public class FriendRelationshipService {
      * @return Page of user profile DTOs
      */
     public Page<UserProfile> getUserFollowing(String userId, Pageable pageable) {
-        return userProfileRepository.findFollowingOfUser(userId, pageable)
-                .map(userProfileService::convertToDto);
+        return userProfileRepository.findFollowingOfUser(userId, pageable).map(userProfileService::convertToDto);
     }
 
     /**
@@ -310,7 +317,8 @@ public class FriendRelationshipService {
      */
     public Page<UserProfile> getPendingFriendRequests(Pageable pageable) {
         UserProfile currentUser = getCurrentUserProfile();
-        return userProfileRepository.findPendingFriendRequestsForUser(currentUser.getId(), pageable)
+        return userProfileRepository
+                .findPendingFriendRequestsForUser(currentUser.getId(), pageable)
                 .map(userProfileService::convertToDto);
     }
 }
