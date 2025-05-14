@@ -1,4 +1,4 @@
-package com.devteria.media_service.config;
+package com.devteria.media_service.configuration;
 
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Value;
