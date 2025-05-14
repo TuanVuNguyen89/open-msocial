@@ -1,10 +1,11 @@
 package com.devteria.comment.dto.response;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
-import java.util.List;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder

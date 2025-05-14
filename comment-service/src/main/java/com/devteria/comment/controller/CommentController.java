@@ -1,5 +1,7 @@
 package com.devteria.comment.controller;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.devteria.comment.dto.ApiResponse;
 import com.devteria.comment.dto.request.CommentCreationRequest;
 import com.devteria.comment.dto.request.CommentUpdateRequest;
@@ -7,14 +9,10 @@ import com.devteria.comment.dto.request.PageRequestDTO;
 import com.devteria.comment.dto.response.CommentResponse;
 import com.devteria.comment.dto.response.PageResponseDTO;
 import com.devteria.comment.service.CommentService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +29,8 @@ public class CommentController {
     }
 
     @PutMapping("/update/{id}")
-    public ApiResponse<CommentResponse> updateComment(@PathVariable String id, @RequestBody CommentUpdateRequest request) {
+    public ApiResponse<CommentResponse> updateComment(
+            @PathVariable String id, @RequestBody CommentUpdateRequest request) {
         return ApiResponse.<CommentResponse>builder()
                 .result(commentService.updateComment(id, request))
                 .build();
@@ -49,7 +48,8 @@ public class CommentController {
             @PathVariable String postId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PageRequestDTO pageRequest = PageRequestDTO.builder().page(page).size(size).build();
+        PageRequestDTO pageRequest =
+                PageRequestDTO.builder().page(page).size(size).build();
         return ApiResponse.<PageResponseDTO<CommentResponse>>builder()
                 .result(commentService.getCommentsByPostIdPaginated(postId, pageRequest))
                 .build();
@@ -60,7 +60,8 @@ public class CommentController {
             @PathVariable String rootId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PageRequestDTO pageRequest = PageRequestDTO.builder().page(page).size(size).build();
+        PageRequestDTO pageRequest =
+                PageRequestDTO.builder().page(page).size(size).build();
         return ApiResponse.<PageResponseDTO<CommentResponse>>builder()
                 .result(commentService.getRepliesByRootIdPaginated(rootId, pageRequest))
                 .build();
@@ -71,7 +72,8 @@ public class CommentController {
             @PathVariable String postId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PageRequestDTO pageRequest = PageRequestDTO.builder().page(page).size(size).build();
+        PageRequestDTO pageRequest =
+                PageRequestDTO.builder().page(page).size(size).build();
         return ApiResponse.<PageResponseDTO<CommentResponse>>builder()
                 .result(commentService.getAllCommentsByPostIdPaginated(postId, pageRequest))
                 .build();

@@ -1,12 +1,13 @@
 package com.devteria.profile.entity;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.neo4j.core.schema.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.neo4j.core.schema.*;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
