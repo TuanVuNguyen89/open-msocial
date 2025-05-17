@@ -14,7 +14,6 @@ import com.devteria.profile.entity.UserProfile;
 import com.devteria.profile.exception.AppException;
 import com.devteria.profile.exception.ErrorCode;
 import com.devteria.profile.mapper.UserProfileMapper;
-import com.devteria.profile.repository.FollowRelationshipRepository;
 import com.devteria.profile.repository.UserProfileRepository;
 
 import lombok.AccessLevel;
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserProfileService {
     UserProfileRepository userProfileRepository;
     UserProfileMapper userProfileMapper;
-    FollowRelationshipRepository followRelationshipRepository;
 
     /**
      * Create a new user profile
@@ -119,52 +117,6 @@ public class UserProfileService {
     }
 
     /**
-     * Follow another user
-     * @param targetUserId ID of user to follow
-     * @return true if successful
-     */
-    public boolean followUser(String targetUserId) {
-        UserProfile currentUser = getUserProfileByUserId(getCurrentUserId());
-        UserProfile targetUser = getUserProfileById(targetUserId);
-
-        // Don't allow following yourself
-        if (currentUser.getId().equals(targetUserId)) {
-            return false;
-        }
-
-        // Check if already following
-        if (followRelationshipRepository.checkFollowRelationship(currentUser.getId(), targetUserId)) {
-            return true; // Already following, consider it success
-        }
-
-        // Create FOLLOWS relationship using Cypher query
-        return followRelationshipRepository.createFollowRelationship(currentUser.getId(), targetUserId);
-    }
-
-    /**
-     * Unfollow a user
-     * @param targetUserId ID of user to unfollow
-     * @return true if successful
-     */
-    public boolean unfollowUser(String targetUserId) {
-        UserProfile currentUser = getUserProfileByUserId(getCurrentUserId());
-        UserProfile targetUser = getUserProfileById(targetUserId);
-
-        // Don't allow unfollowing yourself
-        if (currentUser.getId().equals(targetUserId)) {
-            return false;
-        }
-
-        // Check if actually following
-        if (!followRelationshipRepository.checkFollowRelationship(currentUser.getId(), targetUserId)) {
-            return false; // Not following, consider it success
-        }
-
-        // Delete FOLLOWS relationship using Cypher query
-        return followRelationshipRepository.removeFollowRelationship(currentUser.getId(), targetUserId);
-    }
-
-    /**
      * Get user profile by ID
      * @param id User profile ID
      * @return User profile
@@ -188,7 +140,7 @@ public class UserProfileService {
      * Get the current authenticated user ID
      * @return current user ID from security context
      */
-    private String getCurrentUserId() {
+    public String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
