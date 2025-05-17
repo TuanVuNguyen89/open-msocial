@@ -1,14 +1,11 @@
 package com.devteria.profile.entity;
 
-import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
-import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
-
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.springframework.data.neo4j.core.schema.*;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,15 +16,13 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Node("user_profile")
+@Entity
 public class UserProfile {
     @Id
-    @GeneratedValue(generatorClass = UUIDStringGenerator.class)
+    @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @Property("userId")
     String userId;
-
     String username;
     String email;
 
@@ -35,13 +30,4 @@ public class UserProfile {
     String lastName;
     LocalDate dob;
     String city;
-
-    @Relationship(type = "FRIEND_WITH", direction = OUTGOING)
-    private Set<UserProfile> friends = new HashSet<>();
-
-    @Relationship(type = "FRIEND_REQUEST", direction = OUTGOING)
-    private Set<FriendRequestRelationship> sentFriendRequests = new HashSet<>();
-
-    @Relationship(type = "FRIEND_REQUEST", direction = INCOMING)
-    private Set<FriendRequestRelationship> receivedFriendRequests = new HashSet<>();
 }

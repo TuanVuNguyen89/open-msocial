@@ -93,7 +93,7 @@ export default function Login() {
         >
           <CardContent>
             <Typography variant="h5" component="h1" gutterBottom>
-              Welcome to Devtetia
+              Welcome to Open MSocial
             </Typography>
             <Box
               component="form"
@@ -152,10 +152,12 @@ export default function Login() {
                 Continue with Google
               </Button>
               <Button
-                type="submit"
+                type="button"
                 variant="contained"
                 color="success"
                 size="large"
+                onClick={() => navigate('/register')}
+                fullWidth
               >
                 Create an account
               </Button>
