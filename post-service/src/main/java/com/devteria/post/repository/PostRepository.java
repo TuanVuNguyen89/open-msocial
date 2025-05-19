@@ -5,6 +5,7 @@ import com.devteria.post.entity.Visibility;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
@@ -30,4 +31,17 @@ public interface PostRepository extends MongoRepository<Post, String> {
             Visibility friendsVisibility,
             Pageable pageable
     );
+
+    @Query(value = """
+    {
+      "$or": [
+        { "visibility": "PUBLIC" },
+        { "userId": { "$in": ?1 }, "visibility": "FRIENDS" },
+        { "userId": ?0, "visibility": { "$in": ["FRIENDS", "PRIVATE"] } }
+      ]
+    }
+    """)
+    Page<Post> findFeedPosts(String userId, List<String> friendIds, Pageable pageable);
+
+
 }

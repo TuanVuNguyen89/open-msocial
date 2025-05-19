@@ -48,10 +48,18 @@ public class UserRelationshipController {
                 .build();
     }
 
-    @GetMapping("are-friends")
-    public ApiResponse<Boolean> areFriends(@RequestParam String userId1, @RequestParam String userId2) {
-        boolean result = userRelationshipService.areFriends(userId1, userId2);
-        return ApiResponse.<Boolean>builder().result(result).build();
+    @PostMapping("cancel-friend-request/{receiverId}")
+    public ApiResponse<Boolean> cancelFriendRequest(@PathVariable String receiverId) {
+        return ApiResponse.<Boolean>builder()
+                .result(userRelationshipService.cancelFriendRequest(receiverId))
+                .build();
+    }
+
+    @GetMapping("get-relationship")
+    public ApiResponse<UserRelationshipResponse> areFriends(
+            @RequestParam String userId1, @RequestParam String userId2) {
+        UserRelationshipResponse result = userRelationshipService.getRelationship(userId1, userId2);
+        return ApiResponse.<UserRelationshipResponse>builder().result(result).build();
     }
 
     @GetMapping("friends/{userId}")

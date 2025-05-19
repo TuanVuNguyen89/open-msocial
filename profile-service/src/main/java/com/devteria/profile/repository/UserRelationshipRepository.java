@@ -1,5 +1,6 @@
 package com.devteria.profile.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -27,6 +28,15 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
             @Param("userId") String userId,
             @Param("relationshipType") RelationshipType relationshipType,
             Pageable pageable);
+
+    @Query(
+            """
+		SELECT r FROM UserRelationship r
+		WHERE (r.senderId = :userId OR r.receiverId = :userId)
+		AND r.relationshipType = :relationshipType
+		""")
+    List<UserRelationship> findFriendsByUserId(
+            @Param("userId") String userId, @Param("relationshipType") RelationshipType relationshipType);
 
     @Query(
             """

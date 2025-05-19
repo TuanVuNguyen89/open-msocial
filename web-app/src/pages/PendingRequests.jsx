@@ -20,6 +20,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
+
 import { getPendingRequests, acceptFriendRequest, rejectFriendRequest } from "../services/userService";
 import { isAuthenticated, logOut } from "../services/authenticationService";
 import Scene from "./Scene";
@@ -148,6 +149,11 @@ export default function PendingRequests() {
     });
     setHasMore(true);
   };
+  
+  // Handle viewing a user's profile
+  const handleViewProfile = (userId) => {
+    navigate(`/user-profile/${userId}`);
+  };
 
   return (
     <Scene>
@@ -215,8 +221,9 @@ export default function PendingRequests() {
                   ref={index === requests.length - 1 ? lastRequestElementRef : null}
                   key={`${request.id}-${index}`}
                   alignItems="flex-start"
+                  onClick={() => handleViewProfile(request.id)}
                   secondaryAction={
-                    <Box>
+                    <Box onClick={(e) => e.stopPropagation()}>
                       <Tooltip title="Accept Request" arrow>
                         <IconButton 
                           edge="end" 
@@ -242,22 +249,36 @@ export default function PendingRequests() {
                   }
                   sx={{ 
                     borderBottom: "1px solid #eee",
-                    "&:last-child": { borderBottom: "none" } 
+                    "&:last-child": { borderBottom: "none" },
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                    transition: 'background-color 0.3s'
                   }}
                 >
                   <ListItemAvatar>
-                    <Avatar>
-                      <PersonIcon />
+                    <Avatar 
+                      src={request.avatarUrl}
+                    >
+                      {!request.avatarUrl && (request.firstName?.charAt(0) || request.username?.charAt(0))}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={`${request.firstName || ""} ${request.lastName || ""}`}
+                    primary={
+                      <Typography 
+                        component="span" 
+                        variant="body1" 
+                        color="text.primary"
+                      >
+                        {`${request.firstName || ""} ${request.lastName || ""}`}
+                      </Typography>
+                    }
                     secondary={
                       <>
                         <Typography
                           component="span"
                           variant="body2"
                           color="text.primary"
+
                         >
                           {request.username}
                         </Typography>

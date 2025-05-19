@@ -2,6 +2,8 @@ package com.devteria.post.service;
 
 import com.devteria.post.dto.ApiResponse;
 import com.devteria.post.dto.request.PostEventData;
+import com.devteria.post.dto.response.UserRelationshipResponse;
+import com.devteria.post.entity.RelationshipType;
 import com.devteria.post.entity.Visibility;
 import com.devteria.post.exception.AppException;
 import com.devteria.post.exception.ErrorCode;
@@ -40,11 +42,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostService {
-    DateTimeFormatter dateTimeFormatter;
     PostRepository postRepository;
     PostMapper postMapper;
     ProfileClient profileClient;
     KafkaTemplate<String, PostEvent> kafkaTemplate;
+    DateTimeFormatter dateTimeFormatter;
 
     @NonFinal
     @Value("${spring.kafka.topics.post-created}")
@@ -73,7 +75,11 @@ public class PostService {
         post = postRepository.save(post);
         sendPostEvent(post, "POST_CREATED", postCreatedTopic);
 
-        return postMapper.toPostResponse(post);
+        PostResponse response = postMapper.toPostResponse(post);
+        response.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
+        response.setUser(userProfile);
+
+        return response;
     }
 
     public PageResponse<PostResponse> getMyPosts(int page, int size) {
@@ -85,9 +91,7 @@ public class PostService {
 
         Page<Post> pageData = postRepository.findAllByUserId(userProfile.getId(), pageable);
 
-        String username = userProfile.getUsername();
-        List<PostResponse> postList = mapPostsToResponses(pageData.getContent(), username);
-
+        List<PostResponse> postList = mapPostsToResponses(pageData.getContent(), userProfile);
         return buildPageResponse(pageData, postList, page);
     }
 
@@ -108,10 +112,11 @@ public class PostService {
 
         // Lấy thông tin người dùng mục tiêu
         UserProfileResponse targetProfile = getUserProfileById(targetUserId);
+        if (targetProfile == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        String username = targetProfile != null ? targetProfile.getUsername() : null;
-        List<PostResponse> postList = mapPostsToResponses(pageData.getContent(), username);
-
+        List<PostResponse> postList = mapPostsToResponses(pageData.getContent(), targetProfile);
         return buildPageResponse(pageData, postList, page);
     }
 
@@ -141,10 +146,10 @@ public class PostService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        var username = postUser.getUsername();
         PostResponse postResponse = postMapper.toPostResponse(post);
         postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
-        postResponse.setUsername(username);
+        postResponse.setUser(postUser);
+
         return postResponse;
     }
 
@@ -182,12 +187,11 @@ public class PostService {
 
         kafkaTemplate.send(postUpdatedTopic, event);
 
-        var username = userProfile.getUsername();
         PostResponse postResponse = postMapper.toPostResponse(post);
         postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
-        postResponse.setUsername(username);
+        postResponse.setUser(userProfile);
 
-        return postMapper.toPostResponse(post);
+        return postResponse;
     }
 
     public boolean deletePost(String postId) {
@@ -230,37 +234,41 @@ public class PostService {
         // Lấy danh sách ID bạn bè
         List<String> friendIds = new ArrayList<>();
         try {
-            ApiResponse<List<String>> response = profileClient.getFriendIds(userProfile.getId());
+            ApiResponse<List<UserProfileResponse>> response = profileClient.getFriendIds(userProfile.getId());
             if (response.getResult() != null) {
-                friendIds = response.getResult();
+                response.getResult().forEach(res -> friendIds.add(res.getId()));
             }
         } catch (Exception e) {
             log.error("Error getting friend IDs", e);
         }
 
-        // Lấy bài viết công khai và bài viết của bạn bè
-        Page<Post> pageData = postRepository.findAllByVisibilityOrUserIdInAndVisibility(
-                Visibility.PUBLIC,
+        Page<Post> pageData = postRepository.findFeedPosts(
+                userProfile.getId(),
                 friendIds,
-                Visibility.FRIENDS,
-                pageable);
+                pageable
+        );
 
-        List<PostResponse> postList = pageData.getContent().stream()
-                .map(postMapper::toPostResponse)
-                .toList();
+        List<PostResponse> postList = new ArrayList<>();
+        var userProfileMap = new HashMap<String, UserProfileResponse>();
 
-        var userNameMap = new HashMap<String, String>();
-        postList.forEach(postResponse -> {
-            postResponse.setCreated(dateTimeFormatter.format(postResponse.getCreatedDate()));
-            if (userNameMap.containsKey(postResponse.getUserId())) {
-                postResponse.setUsername(userNameMap.get(postResponse.getUserId()));
+        // Duyệt qua từng bài post và thiết lập thông tin người dùng
+        for (Post post : pageData.getContent()) {
+            PostResponse postResponse = postMapper.toPostResponse(post);
+            postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
+
+            // Kiểm tra xem đã có cache thông tin người dùng chưa
+            if (!userProfileMap.containsKey(post.getUserId())) {
+                UserProfileResponse targetProfile = getUserProfileById(post.getUserId());
+                if (targetProfile != null) {
+                    userProfileMap.put(post.getUserId(), targetProfile);
+                }
             }
-            else {
-                var targetProfile = getUserProfileById(postResponse.getUserId());
-                userNameMap.put(postResponse.getUserId(), targetProfile == null ? "" : targetProfile.getUsername());
-                postResponse.setUsername(targetProfile == null ? "" : targetProfile.getUsername());
-            }
-        });
+
+            // Thiết lập thông tin người dùng vào post response
+            postResponse.setUser(userProfileMap.get(post.getUserId()));
+            postList.add(postResponse);
+        }
+
         return buildPageResponse(pageData, postList, page);
     }
 
@@ -299,8 +307,8 @@ public class PostService {
 
     private boolean checkFriendship(String userId, String targetUserId) {
         try {
-            ApiResponse<Boolean> response = profileClient.areFriends(userId, targetUserId);
-            return Boolean.TRUE.equals(response.getResult());
+            ApiResponse<UserRelationshipResponse> response = profileClient.areFriends(userId, targetUserId);
+            return response.getResult().getRelationshipType().equals(RelationshipType.FRIEND);
         } catch (Exception e) {
             log.error("Error checking friendship relationship", e);
             return false;
@@ -327,13 +335,17 @@ public class PostService {
         return PageRequest.of(page - 1, size, sort);
     }
 
-    private List<PostResponse> mapPostsToResponses(List<Post> posts, String username) {
-        return posts.stream().map(post -> {
+    private List<PostResponse> mapPostsToResponses(List<Post> posts, UserProfileResponse userProfile) {
+        List<PostResponse> postResponses = new ArrayList<>();
+
+        for (Post post : posts) {
             PostResponse postResponse = postMapper.toPostResponse(post);
             postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
-            postResponse.setUsername(username);
-            return postResponse;
-        }).toList();
+            postResponse.setUser(userProfile);
+            postResponses.add(postResponse);
+        }
+
+        return postResponses;
     }
 
     private void sendPostEvent(Post post, String eventType, String topic) {

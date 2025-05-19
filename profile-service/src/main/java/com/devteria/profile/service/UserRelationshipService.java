@@ -1,5 +1,7 @@
 package com.devteria.profile.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -116,6 +118,26 @@ public class UserRelationshipService {
         return true;
     }
 
+    public Boolean cancelFriendRequest(String received) {
+        var receiver = userProfileService.getProfile(received);
+        var sender = userProfileService.getMyProfile();
+
+        var existedRelationship =
+                userRelationshipRepository.findBySenderIdAndReceiverId(sender.getId(), receiver.getId());
+
+        if (existedRelationship.isEmpty()) {
+            throw new AppException(ErrorCode.NOT_SENT_FRIEND_REQUEST);
+        }
+
+        var relationship = existedRelationship.get();
+        if (relationship.getRelationshipType() == RelationshipType.FRIEND) {
+            throw new AppException(ErrorCode.FRIEND_RELATIONSHIP);
+        }
+
+        userRelationshipRepository.delete(relationship);
+        return true;
+    }
+
     public boolean removeFriend(String receiverId) {
         var me = userProfileService.getMyProfile();
         var other = userProfileService.getProfile(receiverId);
@@ -145,21 +167,29 @@ public class UserRelationshipService {
         return false;
     }
 
-    public boolean areFriends(String userId1, String userId2) {
+    public UserRelationshipResponse getRelationship(String userId1, String userId2) {
         var user1 = userProfileService.getProfile(userId1);
         var user2 = userProfileService.getProfile(userId2);
 
         var existedRelationship = userRelationshipRepository.findBySenderIdAndReceiverId(user1.getId(), user2.getId());
         if (existedRelationship.isPresent()) {
             var relationship = existedRelationship.get();
-            return relationship.getRelationshipType() != RelationshipType.SENT_FRIEND_REQUEST;
+            return UserRelationshipResponse.builder()
+                    .sender(user1)
+                    .receiver(user2)
+                    .relationshipType(relationship.getRelationshipType())
+                    .build();
         }
 
         existedRelationship = userRelationshipRepository.findBySenderIdAndReceiverId(user2.getId(), user1.getId());
-        if (existedRelationship.isEmpty()) return false;
+        if (existedRelationship.isEmpty()) return null;
 
         var relationship = existedRelationship.get();
-        return relationship.getRelationshipType() != RelationshipType.SENT_FRIEND_REQUEST;
+        return UserRelationshipResponse.builder()
+                .sender(user2)
+                .receiver(user1)
+                .relationshipType(relationship.getRelationshipType())
+                .build();
     }
 
     public Page<UserProfileResponse> getUserFriends(String userId, Pageable pageable) {
@@ -171,6 +201,18 @@ public class UserRelationshipService {
                 .toList();
 
         return new PageImpl<>(profiles, pageable, relationships.getTotalElements());
+    }
+
+    public List<UserProfileResponse> getUserFriends(String userId) {
+        var relationships = userRelationshipRepository.findFriendsByUserId(userId, RelationshipType.FRIEND);
+        var friendIds =
+                relationships.stream().map(r -> r.getSenderId().equals(userId) ? r.getReceiverId() : r.getSenderId());
+
+        var profiles = friendIds
+                .map(userProfileService::getProfile) // Chuyển userId sang UserProfile
+                .toList();
+
+        return profiles;
     }
 
     public Page<UserProfileResponse> getPendingFriendRequests(Pageable pageable) {
