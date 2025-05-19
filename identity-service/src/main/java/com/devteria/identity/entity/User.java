@@ -1,5 +1,6 @@
 package com.devteria.identity.entity;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -29,6 +30,10 @@ public class User {
 
     @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default false")
     boolean emailVerified;
+
+    String firstName;
+    LocalDate dob;
+    String lastName;
 
     @ManyToMany
     Set<Role> roles;

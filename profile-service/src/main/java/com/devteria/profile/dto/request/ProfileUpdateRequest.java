@@ -15,4 +15,7 @@ public class ProfileUpdateRequest {
     String lastName;
     LocalDate dob;
     String city;
+
+    String avatarUrl;
+    String backgroundUrl;
 }

@@ -3,12 +3,10 @@ package com.devteria.media_service.controller;
 import com.devteria.media_service.dto.*;
 import com.devteria.media_service.dto.response.MediaResponse;
 import com.devteria.media_service.dto.response.MediaUploadResponse;
-import com.devteria.media_service.entity.Media;
 import com.devteria.media_service.service.MediaService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,13 +27,14 @@ public class MediaController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<MediaUploadResponse> uploadMedia(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("postId") String postId
+            @RequestParam(value = "postId", required = false) String postId
     ) {
         return ApiResponse.<MediaUploadResponse>builder()
                 .result(mediaService.upload(file, postId))
                 .message("Media uploaded successfully")
                 .build();
     }
+
 
     @GetMapping("/{id}")
     public ApiResponse<MediaResponse> getMedia(@PathVariable String id) {

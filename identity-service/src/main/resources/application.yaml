@@ -20,10 +20,17 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+outbound:
+  identity:
+    client-id: "350237683034-u8nbbb50l61a7j072mrnjgf8vgec63oe.apps.googleusercontent.com"
+    client-secret: "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"
+    redirect-uri: "http://localhost:3000/authenticate"
+
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGwxuG5SIf/1y/LgJxHnMqaF6A/ij"
-  valid-duration: 3600 # in second
-  refreshable-duration: 36000 # in seconds
+  valid-duration: 86400 # in second
+  refreshable-duration: 259200 # in seconds
 
 app:
   services:
@@ -31,4 +38,4 @@ app:
 
 admin:
   username: admin
-  password: admin
+  password: anhyeuem

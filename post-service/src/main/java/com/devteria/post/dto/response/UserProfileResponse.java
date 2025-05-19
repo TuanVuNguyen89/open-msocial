@@ -22,4 +22,6 @@ public class UserProfileResponse {
     String lastName;
     LocalDate dob;
     String city;
+    String avatarUrl;
+    String backgroundUrl;
 }

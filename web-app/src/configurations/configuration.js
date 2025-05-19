@@ -14,5 +14,19 @@ export const API = {
   REJECT_FRIEND_REQUEST: "/profile/relationship/reject-friend-request/{senderId}",
   REMOVE_FRIEND: "/profile/relationship/remove-friend/{friendId}",
   LIST_FRIENDS: "/profile/relationship/friends/{userId}",
-  REGISTRATION: "/identity/users/registration"
+  REGISTRATION: "/identity/users/registration",
+  SEND_FRIEND_REQUEST: "/profile/relationship/send-friend-request/{receiverId}",
+  GET_RELATIONSHIP: "/profile/relationship/get-relationship",
+  CANCEL_FRIEND_REQUEST: "/profile/relationship/cancel-friend-request/{receiverId}",
+  UPLOAD_MEDIA: "/media/upload",
+  GET_MEDIA: "/media/{id}",
+  DELETE_MEDIA: "/media/{id}",
+  DOWNLOAD_MEDIA: "/media/download/{id}",
+  VIEW_MEDIA: "/media/view/{id}",
+  CREATE_POST: "/post/create",
+  USER_POSTS: "/post/user-posts/{userId}",
+  GET_POST_BY_ID: "/post/{postId}",
+  UPDATE_POST: "/post/{postId}",
+  DELETE_POST: "/post/{postId}",
+  GET_FEED: "/post/get-feed"
 };

@@ -10,10 +10,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.devteria.identity.constant.PredefinedRole;
+import com.devteria.identity.dto.request.ProfileCreationRequest;
 import com.devteria.identity.entity.Role;
 import com.devteria.identity.entity.User;
 import com.devteria.identity.repository.RoleRepository;
 import com.devteria.identity.repository.UserRepository;
+import com.devteria.identity.repository.httpclient.ProfileClient;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
+    ProfileClient profileClient;
 
     @NonFinal
     @Value("${admin.username}")
-    static final String ADMIN_USER_NAME = "admin";
+    protected String ADMIN_USER_NAME;
 
     @NonFinal
     @Value("${admin.password}")
-    static final String ADMIN_PASSWORD = "admin";
+    protected String ADMIN_PASSWORD;
 
     @Bean
     @ConditionalOnProperty(
@@ -61,13 +64,25 @@ public class ApplicationInitConfig {
 
                 User user = User.builder()
                         .username(ADMIN_USER_NAME)
+                        .firstName("Vu")
+                        .lastName("Nguyen")
+                        .email("contact@ntuanvu89.id.vn")
                         .emailVerified(true)
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
                         .roles(roles)
                         .build();
 
                 userRepository.save(user);
-                log.warn("admin user has been created with default password: admin, please change it");
+                var profileRequest = ProfileCreationRequest.builder()
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .dob(user.getDob())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .userId(user.getId())
+                        .build();
+
+                profileClient.createProfile(profileRequest);
             }
             log.info("Application initialization completed .....");
         };

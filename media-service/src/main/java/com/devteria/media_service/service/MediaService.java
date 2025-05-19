@@ -48,7 +48,7 @@ public class MediaService {
      * Upload media file to Cloudinary and save metadata to database
      */
     public MediaUploadResponse upload(MultipartFile file, String postId) {
-        log.debug("Uploading media for postId: {}", postId);
+        //log.debug("Uploading media for postId: {}", postId);
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String token;
 
@@ -62,9 +62,11 @@ public class MediaService {
         String userId = getCurrentUserId();
         UserProfileResponse userProfile = getUserProfile(userId);
 
-        PostResponse post = postClient.getPost(postId, authHeader).getResult();
-        if (!post.getUserId().equals(userProfile.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+        if (postId != null) {
+            PostResponse post = postClient.getPost(postId, authHeader).getResult();
+            if (!post.getUserId().equals(userProfile.getId())) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
         }
 
         validateFile(file);

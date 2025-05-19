@@ -24,8 +24,8 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete";
+
+
 import { getMyFriends, removeFriend, listFriends } from "../services/userService";
 import { isAuthenticated, logOut } from "../services/authenticationService";
 import Scene from "./Scene";
@@ -43,11 +43,7 @@ export default function Friends() {
     totalElements: 0,
     totalPages: 1
   });
-  const [confirmDialog, setConfirmDialog] = useState({
-    open: false,
-    friendId: null,
-    friendName: ""
-  });
+
   
   // Check if we're viewing someone else's friends list
   const queryParams = new URLSearchParams(location.search);
@@ -145,38 +141,7 @@ export default function Friends() {
     navigate(`/user-profile/${friendId}`);
   };
   
-  // Open confirmation dialog for removing a friend
-  const openRemoveDialog = (friendId, friendName) => {
-    setConfirmDialog({
-      open: true,
-      friendId,
-      friendName
-    });
-  };
-  
-  // Close confirmation dialog
-  const closeRemoveDialog = () => {
-    setConfirmDialog({
-      ...confirmDialog,
-      open: false
-    });
-  };
-  
-  // Handle removing a friend
-  const handleRemoveFriend = async () => {
-    try {
-      setLoading(true);
-      await removeFriend(confirmDialog.friendId);
-      // Remove the friend from the list
-      setFriends(prev => prev.filter(friend => friend.id !== confirmDialog.friendId));
-      closeRemoveDialog();
-    } catch (error) {
-      console.error("Error removing friend:", error);
-      // Show error message
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   return (
     <Scene>
@@ -244,53 +209,39 @@ export default function Friends() {
                   ref={index === friends.length - 1 ? lastFriendElementRef : null}
                   key={`${friend.id}-${index}`}
                   alignItems="flex-start"
-                  secondaryAction={
-                    <Box>
-                      <Tooltip title="View Profile" arrow>
-                        <IconButton 
-                          edge="end" 
-                          color="primary" 
-                          onClick={() => handleViewProfile(friend.id)}
-                          size="small"
-                          sx={{ mr: 1 }}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      
-                      {isOwnFriendsList && (
-                        <Tooltip title="Remove Friend" arrow>
-                          <IconButton 
-                            edge="end" 
-                            color="error" 
-                            onClick={() => openRemoveDialog(friend.id, `${friend.firstName || ''} ${friend.lastName || ''}`)} 
-                            size="small"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  }
+                  onClick={() => handleViewProfile(friend.id)}
                   sx={{ 
                     borderBottom: "1px solid #eee",
                     "&:last-child": { borderBottom: "none" },
-                    pr: 8 // Add padding to the right for the action buttons
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                    transition: 'background-color 0.3s'
                   }}
                 >
                   <ListItemAvatar>
-                    <Avatar>
-                      <PersonIcon />
+                    <Avatar 
+                      src={friend.avatarUrl}
+                    >
+                      {!friend.avatarUrl && (friend.firstName?.charAt(0) || friend.username?.charAt(0))}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={`${friend.firstName || ""} ${friend.lastName || ""}`}
+                    primary={
+                      <Typography 
+                        component="span" 
+                        variant="body1" 
+                        color="text.primary"
+                      >
+                        {`${friend.firstName || ""} ${friend.lastName || ""}`}
+                      </Typography>
+                    }
                     secondary={
                       <>
                         <Typography
                           component="span"
                           variant="body2"
                           color="text.primary"
+
                         >
                           {friend.username}
                         </Typography>
@@ -319,30 +270,7 @@ export default function Friends() {
         )}
       </Card>
       
-      {/* Confirmation Dialog for removing a friend */}
-      <Dialog
-        open={confirmDialog.open}
-        onClose={closeRemoveDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Remove Friend
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to remove {confirmDialog.friendName} from your friends list?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeRemoveDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleRemoveFriend} color="error" autoFocus>
-            Remove
-          </Button>
-        </DialogActions>
-      </Dialog>
+
     </Scene>
   );
 }

@@ -47,6 +47,6 @@ public class Media {
     @Column(name = "user_id", nullable = false)
     String userId;
 
-    @Column(name = "post_id", nullable = false)
+    @Column(name = "post_id")
     String postId;
 }

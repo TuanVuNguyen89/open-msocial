@@ -111,6 +111,12 @@ public class UserProfileService {
         if (request.getCity() != null) {
             userProfile.setCity(request.getCity());
         }
+        if (request.getAvatarUrl() != null) {
+            userProfile.setAvatarUrl(request.getAvatarUrl());
+        }
+        if (request.getBackgroundUrl() != null) {
+            userProfile.setBackgroundUrl(request.getBackgroundUrl());
+        }
 
         userProfile = userProfileRepository.save(userProfile);
         return userProfileMapper.toUserProfileReponse(userProfile);
@@ -160,6 +166,8 @@ public class UserProfileService {
                 .lastName(userProfile.getLastName())
                 .dob(userProfile.getDob())
                 .city(userProfile.getCity())
+                .avatarUrl(userProfile.getAvatarUrl())
+                .backgroundUrl(userProfile.getBackgroundUrl())
                 .build();
     }
 }

@@ -18,8 +18,9 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     SENT_FRIEND_REQUEST(1009, "Sent friend request before", HttpStatus.BAD_REQUEST),
     FRIEND_RELATIONSHIP(1010, "Had been friend", HttpStatus.BAD_REQUEST),
-    NOT_SENT_FRIEND_REQUEST(1011, "Don't be send friend request yet", HttpStatus.BAD_REQUEST),
-    NOT_BE_FRIEND(1012, "Not be friend", HttpStatus.BAD_REQUEST);
+    NOT_SENT_FRIEND_REQUEST(1011, "Don't send friend request yet", HttpStatus.BAD_REQUEST),
+    NOT_BE_FRIEND(1012, "Not be friend", HttpStatus.BAD_REQUEST),
+    INVALID_REQUEST(1001, "Invalid request", HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

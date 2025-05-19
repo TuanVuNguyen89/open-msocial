@@ -102,3 +102,39 @@ export const registration = async (request) => {
       city: request.city
     });
 }
+
+export const sendFriendRequest = async (receiverId) => {
+    return await httpClient.post(
+      API.SEND_FRIEND_REQUEST.replace("{receiverId}", receiverId), 
+      {}, // Empty body or you can add body data here if needed
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
+};
+
+export const areFriend = async (userId1, userId2) => {
+  return await httpClient.get(API.GET_RELATIONSHIP, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    params: {
+      userId1,
+      userId2,
+    },
+  });
+};
+
+export const cancelFriendRequest = async (receiverId) => {
+    return await httpClient.post(
+      API.CANCEL_FRIEND_REQUEST.replace("{receiverId}", receiverId), 
+      {}, // Empty body or you can add body data here if needed
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
+};
