@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyInfo } from '../services/userService';
-import { logOut } from '../services/authenticationService';
+import { logOut, isAuthenticated } from '../services/authenticationService';
 
 /**
  * Custom hook to fetch and manage user information
@@ -12,7 +12,12 @@ const useUserInfo = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserInfo();
+    // Only fetch user info if the user is authenticated
+    if (isAuthenticated()) {
+      fetchUserInfo();
+    } else {
+      setLoadingUserInfo(false);
+    }
   }, []);
 
   const fetchUserInfo = () => {

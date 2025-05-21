@@ -6,6 +6,7 @@ import Friends from "../pages/Friends";
 import PendingRequests from "../pages/PendingRequests";
 import UserProfile from "../pages/UserProfile";
 import Registration from "../pages/Registration";
+import Authenticate from "../components/Authenticate";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="/friends" element={<Friends />} />
         <Route path="/pending-requests" element={<PendingRequests />} />
         <Route path="/user-profile/:userId" element={<UserProfile />} />
+        <Route path="/authenticate" element={<Authenticate />} />
       </Routes>
     </Router>
   );

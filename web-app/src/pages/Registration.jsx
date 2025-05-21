@@ -109,9 +109,7 @@ export default function Registration() {
     }
     
     // Date of birth validation
-    if (!formData.dob) {
-      newErrors.dob = "Date of birth is required";
-    } else {
+    if (formData.dob) {
       // Check if date is valid
       const dobDate = new Date(formData.dob);
       if (isNaN(dobDate.getTime())) {
@@ -362,7 +360,6 @@ export default function Registration() {
                 error={Boolean(errors.dob)}
                 helperText={errors.dob || 'Format: yyyy-MM-dd'}
                 disabled={loading || success}
-                required
                 InputLabelProps={{
                   shrink: true,
                 }}

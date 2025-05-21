@@ -30,3 +30,9 @@ export const API = {
   DELETE_POST: "/post/{postId}",
   GET_FEED: "/post/get-feed"
 };
+
+export const OAuthConfig = {
+  clientId: "350237683034-u8nbbb50l61a7j072mrnjgf8vgec63oe.apps.googleusercontent.com",
+  redirectUri: "http://localhost:3000/authenticate",
+  authUri: "https://accounts.google.com/o/oauth2/auth",
+};
