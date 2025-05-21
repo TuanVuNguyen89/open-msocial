@@ -31,7 +31,7 @@ import ExploreIcon from "@mui/icons-material/Explore";
 
 // Services
 import { getMyInfo } from "../services/userService";
-import { logOut } from "../services/authenticationService";
+import { logOut, isAuthenticated } from "../services/authenticationService";
 import useUserInfo from "../hooks/useUserInfo";
 
 function SideMenu() {
@@ -49,19 +49,21 @@ function SideMenu() {
     navigate("/login");
   };
 
-  // Navigation items
-  const mainNavItems = [
+  // Navigation items - Show different items based on authentication status
+  const mainNavItems = isAuthenticated() ? [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Friends", icon: <PeopleIcon />, path: "/friends" },
     { text: "Messages", icon: <MessageIcon />, path: "/messages", badge: 5 },
     { text: "Notifications", icon: <NotificationsIcon />, path: "/notifications", badge: notificationCount },
     { text: "Explore", icon: <ExploreIcon />, path: "/explore" },
+  ] : [
+    { text: "Login", icon: <PersonIcon />, path: "/login" },
   ];
 
-  const secondaryNavItems = [
+  const secondaryNavItems = isAuthenticated() ? [
     { text: "Saved Posts", icon: <BookmarkIcon />, path: "/saved" },
     { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
-  ];
+  ] : [];
 
   // Check if a nav item is active
   const isActive = (path) => {
@@ -109,87 +111,89 @@ function SideMenu() {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Toolbar />
       
-      {/* User Profile Section with Background */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center',
-        position: 'relative',
-        width: '100%',
-        pb: 2,
-        mb: 10 // Thêm margin bottom để tạo khoảng cách với các phần tử phía dưới
-      }}>
-        {/* Background Image */}
-        <Box
-          sx={{
-            height: 80, // Giảm chiều cao của background
-            width: '100%',
-            backgroundImage: userInfo?.backgroundUrl 
-              ? `url(${userInfo.backgroundUrl})` 
-              : 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative'
-          }}
-        />
-        
-        {/* Avatar and User Info */}
+      {/* User Profile Section with Background - Only show when authenticated */}
+      {isAuthenticated() && (
         <Box sx={{ 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center',
-          position: 'absolute',
-          top: 30, // Điều chỉnh vị trí avatar
-          width: '100%'
+          position: 'relative',
+          width: '100%',
+          pb: 2,
+          mb: 10 // Thêm margin bottom để tạo khoảng cách với các phần tử phía dưới
         }}>
-          {loadingUserInfo ? (
-            <>
-              <Skeleton variant="circular" width={80} height={80} />
-              <Skeleton variant="text" width={150} height={30} sx={{ mt: 1 }} />
-              <Skeleton variant="text" width={100} height={20} />
-            </>
-          ) : (
-            <>
-              <Avatar 
-                src={userInfo?.avatarUrl} 
-                alt={userInfo?.username}
-                sx={{ 
-                  width: 70, // Giảm kích thước avatar
-                  height: 70, 
-                  mb: 1, 
-                  boxShadow: 2,
-                  border: '3px solid white',
-                  cursor: 'pointer',
-                  backgroundColor: theme.palette.primary.main
-                }}
-                onClick={() => navigate('/profile')}
-              >
-                {userInfo?.firstName?.charAt(0) || userInfo?.username?.charAt(0)}
-              </Avatar>
-              <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                {userInfo?.firstName && userInfo?.lastName 
-                  ? `${userInfo.firstName} ${userInfo.lastName}` 
-                  : userInfo?.username || 'User Name'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                @{userInfo?.username || 'username'}
-              </Typography>
-              
-              <Button 
-                variant="outlined" 
-                size="small" 
-                startIcon={<PersonIcon />}
-                onClick={() => navigate('/profile')}
-                sx={{ mt: 1, borderRadius: 4 }}
-              >
-                View Profile
-              </Button>
-            </>
-          )}
+          {/* Background Image */}
+          <Box
+            sx={{
+              height: 80, // Giảm chiều cao của background
+              width: '100%',
+              backgroundImage: userInfo?.backgroundUrl 
+                ? `url(${userInfo.backgroundUrl})` 
+                : 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'relative'
+            }}
+          />
+          
+          {/* Avatar and User Info */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            position: 'absolute',
+            top: 30, // Điều chỉnh vị trí avatar
+            width: '100%'
+          }}>
+            {loadingUserInfo ? (
+              <>
+                <Skeleton variant="circular" width={80} height={80} />
+                <Skeleton variant="text" width={150} height={30} sx={{ mt: 1 }} />
+                <Skeleton variant="text" width={100} height={20} />
+              </>
+            ) : (
+              <>
+                <Avatar 
+                  src={userInfo?.avatarUrl} 
+                  alt={userInfo?.username}
+                  sx={{ 
+                    width: 70, // Giảm kích thước avatar
+                    height: 70, 
+                    mb: 1, 
+                    boxShadow: 2,
+                    border: '3px solid white',
+                    cursor: 'pointer',
+                    backgroundColor: theme.palette.primary.main
+                  }}
+                  onClick={() => navigate('/profile')}
+                >
+                  {userInfo?.firstName?.charAt(0) || userInfo?.username?.charAt(0)}
+                </Avatar>
+                <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                  {userInfo?.firstName && userInfo?.lastName 
+                    ? `${userInfo.firstName} ${userInfo.lastName}` 
+                    : userInfo?.username || 'User Name'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  @{userInfo?.username || 'username'}
+                </Typography>
+                
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  startIcon={<PersonIcon />}
+                  onClick={() => navigate('/profile')}
+                  sx={{ mt: 1, borderRadius: 4 }}
+                >
+                  View Profile
+                </Button>
+              </>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
       
-      <Divider sx={{ mt: 8, mb: 2 }} /> {/* Tăng margin top */}
+      <Divider sx={{ mt: isAuthenticated() ? 8 : 2, mb: 2 }} /> {/* Adjust margin based on authentication */}
       
       {/* Main Navigation */}
       <List sx={{ px: 1, flexGrow: 0, width: '100%' }}>
@@ -198,10 +202,12 @@ function SideMenu() {
       
       <Divider sx={{ my: 2 }} />
       
-      {/* Secondary Navigation */}
+      {/* Secondary Navigation - Only show when authenticated */}
+      {isAuthenticated() && (
       <List sx={{ px: 1, flexGrow: 0, width: '100%' }}>
         {secondaryNavItems.map(renderNavItem)}
       </List>
+      )}
       
       {/* Logout Button - at the bottom */}
       <Box sx={{ mt: 'auto', mb: 2, px: 3 }}>
