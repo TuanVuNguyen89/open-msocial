@@ -7,26 +7,35 @@ import {
   Typography,
   Grid,
   Divider,
-  IconButton,
-  Tooltip,
   Snackbar,
   Alert,
-  Avatar
+  Avatar,
+  Button,
+  Container,
+  useTheme,
+  Stack,
+  Pagination
 } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import CheckIcon from "@mui/icons-material/Check";
 import CancelIcon from "@mui/icons-material/Cancel";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import ThumbDownIcon from "@mui/icons-material/ThumbDown";
-import { getProfile, getMyInfo, areFriend, sendFriendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } from "../services/userService";
+import EmailIcon from "@mui/icons-material/Email";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import CakeIcon from "@mui/icons-material/Cake";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import { getProfile, getMyInfo, areFriend, sendFriendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend } from "../services/userService";
+import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import { isAuthenticated, logOut } from "../services/authenticationService";
+// Post component import removed
 import Scene from "./Scene";
 
 export default function UserProfile() {
   const navigate = useNavigate();
   const { userId } = useParams();
+  const theme = useTheme();
+
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,12 +43,17 @@ export default function UserProfile() {
   const [isSender, setIsSender] = useState(false); // Whether current user is the sender of the friend request
   const [friendRequestCancelling, setFriendRequestCancelling] = useState(false);
   const [friendRequestProcessing, setFriendRequestProcessing] = useState(false); // For accept/reject operations
+  const [removingFriend, setRemovingFriend] = useState(false);
   const [myId, setMyId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success'
   });
+  
+  // Removed posts state
+  
+
 
   const checkIfOwnProfile = async () => {
     try {
@@ -83,6 +97,8 @@ export default function UserProfile() {
       if (result && result.currentUserId) {
         await checkFriendshipStatus(result.currentUserId);
       }
+      
+      // Posts section removed
     } catch (error) {
       console.error("Error fetching user profile:", error);
       if (error.response?.status === 401) {
@@ -95,6 +111,8 @@ export default function UserProfile() {
       setLoading(false);
     }
   };
+  
+  // Removed fetchUserPosts function
   
   const checkFriendshipStatus = async (currentUserId) => {
     try {
@@ -245,6 +263,30 @@ export default function UserProfile() {
       </Grid>
     );
   };
+  
+  // Handle removing a friend
+  const handleRemoveFriend = async () => {
+    try {
+      setRemovingFriend(true);
+      await removeFriend(userId);
+      // Reset relationship status
+      setRelationshipType(null);
+      setRemovingFriend(false);
+      setSnackbar({
+        open: true,
+        message: 'Friend removed successfully',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      setRemovingFriend(false);
+      setSnackbar({
+        open: true,
+        message: 'Failed to remove friend. Please try again.',
+        severity: 'error'
+      });
+    }
+  };
 
   // Navigate to view this user's friends
   const viewUserFriends = () => {
@@ -287,140 +329,242 @@ export default function UserProfile() {
           </Typography>
         </Box>
       ) : userDetails ? (
-        <Card
-          sx={{
-            minWidth: 350,
-            maxWidth: 600,
-            margin: "auto",
-            mt: 6,
-            p: 0,
-            boxShadow: 4,
-            borderRadius: 3,
-            overflow: 'hidden',
-            position: 'relative'
-          }}
-        >
-          {/* Background Image */}
+        <>
+          {/* Profile Header with Background */}
           <Box
             sx={{
-              height: 150,
+              position: 'relative',
+              height: '300px',
               width: '100%',
-              backgroundImage: userDetails.backgroundUrl ? `url(${userDetails.backgroundUrl})` : 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+              background: userDetails.backgroundUrl 
+                ? `url(${userDetails.backgroundUrl})` 
+                : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                zIndex: 1
+              }
             }}
-          />
+          >
+            <Container maxWidth="lg">
+              <Box sx={{ 
+                position: 'relative', 
+                zIndex: 2, 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                pb: 3,
+                color: 'white'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
+                  <Avatar
+                    src={userDetails.avatarUrl}
+                    sx={{ 
+                      width: 150, 
+                      height: 150, 
+                      border: '5px solid white',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    {userDetails.firstName?.charAt(0) || userDetails.username?.charAt(0)}
+                  </Avatar>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="h3" fontWeight="bold" sx={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                      {userDetails.firstName} {userDetails.lastName}
+                    </Typography>
+                    <Typography variant="h6" sx={{ opacity: 0.9, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                      @{userDetails.username}
+                    </Typography>
+                    
+                    {/* User stats */}
 
-          {/* Avatar */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: -5, mb: 2 }}>
-            <Avatar
-              src={userDetails.avatarUrl}
-              sx={{ width: 100, height: 100, border: '4px solid white' }}
-            >
-              {userDetails.firstName?.charAt(0) || userDetails.username?.charAt(0)}
-            </Avatar>
+                  </Box>
+                </Box>
+              </Box>
+            </Container>
           </Box>
-
-          <Box sx={{ px: 4, pb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-              <Typography
-                sx={{
-                  fontSize: 20,
-                  fontWeight: 600,
-                  textAlign: "center",
-                }}
-              >
-                {userDetails.firstName} {userDetails.lastName}'s Profile
-              </Typography>
-              <Tooltip title="Back to Profile" arrow placement="top">
-                <IconButton 
-                  color="primary" 
-                  onClick={() => navigate('/profile')}
-                  size="small"
-                  sx={{ ml: 2 }}
-                >
-                  <HomeIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
           
-          {/* Small icons under title */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
-            <Tooltip title="View Friends" arrow placement="top">
-              <IconButton 
-                color="primary" 
+          <Container maxWidth="lg" sx={{ mt: 2 }}>
+            {/* Action Buttons */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end',
+              gap: 1,
+              mb: 3
+            }}>
+              {/* Back to my profile button */}
+              <Button 
+                variant="outlined" 
+                startIcon={<HomeIcon />} 
+                onClick={() => navigate('/profile')}
+                size="small"
+              >
+                My Profile
+              </Button>
+              
+              {/* View Friends button */}
+              <Button 
+                variant="outlined" 
+                startIcon={<PeopleIcon />} 
                 onClick={viewUserFriends}
                 size="small"
               >
-                <PeopleIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            
-            {/* Show Send Friend Request button if no relationship exists */}
-            {relationshipType === null && (
-              <Tooltip title="Send Friend Request" arrow placement="top">
-                <IconButton 
-                  color="primary" 
+                View Friends
+              </Button>
+              
+              {/* Friend relationship buttons */}
+              {relationshipType === null && (
+                <Button 
+                  variant="contained" 
+                  startIcon={<PersonAddIcon />} 
                   onClick={handleSendFriendRequest}
                   size="small"
+                  color="primary"
                 >
-                  <PersonAddIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            
-            {/* Show Friend Request Sent status if current user sent a request */}
-            {relationshipType === 'SENT_FRIEND_REQUEST' && isSender && (
-              <Tooltip title="Cancel Friend Request" arrow placement="top">
-                <IconButton 
-                  color="error" 
+                  Add Friend
+                </Button>
+              )}
+              
+              {relationshipType === 'SENT_FRIEND_REQUEST' && isSender && (
+                <Button 
+                  variant="outlined" 
+                  startIcon={<CancelIcon />} 
                   onClick={handleCancelFriendRequest}
                   size="small"
+                  color="error"
                   disabled={friendRequestCancelling}
                 >
-                  <CancelIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            
-            {/* Show Friend Request Received status with Accept/Reject buttons if other user sent a request */}
-            {relationshipType === 'SENT_FRIEND_REQUEST' && !isSender && (
-              <>
-                <Tooltip title="Accept Friend Request" arrow placement="top">
-                  <IconButton 
-                    color="success" 
-                    size="small"
+                  Cancel Request
+                </Button>
+              )}
+              
+              {relationshipType === 'SENT_FRIEND_REQUEST' && !isSender && (
+                <Stack direction="row" spacing={1}>
+                  <Button 
+                    variant="contained" 
+                    startIcon={<CheckIcon />} 
                     onClick={handleAcceptFriendRequest}
-                    disabled={friendRequestProcessing}
-                  >
-                    <ThumbUpIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Reject Friend Request" arrow placement="top">
-                  <IconButton 
-                    color="error" 
                     size="small"
-                    onClick={handleRejectFriendRequest}
+                    color="success"
                     disabled={friendRequestProcessing}
                   >
-                    <ThumbDownIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-          </Box>
-          
-          <Divider sx={{ mb: 3 }} />
-          
-          {renderField("Username", userDetails.username)}
-          {renderField("Email", userDetails.email)}
-          {renderField("First Name", userDetails.firstName)}
-          {renderField("Last Name", userDetails.lastName)}
-          {renderField("Date of Birth", userDetails.dob)}
-          {renderField("City", userDetails.city)}
-          </Box>
-        </Card>
+                    Accept
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<CancelIcon />} 
+                    onClick={handleRejectFriendRequest}
+                    size="small"
+                    color="error"
+                    disabled={friendRequestProcessing}
+                  >
+                    Decline
+                  </Button>
+                </Stack>
+              )}
+              
+              {relationshipType === 'FRIEND' && (
+                <Button 
+                  variant="outlined" 
+                  startIcon={<PersonRemoveIcon />} 
+                  onClick={handleRemoveFriend}
+                  size="small"
+                  color="error"
+                  disabled={removingFriend}
+                >
+                  Remove Friend
+                </Button>
+              )}
+            </Box>
+            
+            {/* Profile Content */}
+            {/* User Information Card */}
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+              <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                    User Information
+                  </Typography>
+                  
+                  <Divider sx={{ mb: 3 }} />
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <List>
+                        <ListItem>
+                          <ListItemIcon>
+                            <EmailIcon color="primary" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary="Email" 
+                            secondary={userDetails.email || "Not provided"} 
+                          />
+                        </ListItem>
+                        
+                        <ListItem>
+                          <ListItemIcon>
+                            <CakeIcon color="primary" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary="Birthday" 
+                            secondary={userDetails.dob || "Not provided"} 
+                          />
+                        </ListItem>
+                        
+                        <ListItem>
+                          <ListItemIcon>
+                            <LocationOnIcon color="primary" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary="Location" 
+                            secondary={userDetails.city || "Not provided"} 
+                          />
+                        </ListItem>
+                      </List>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <List>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Username" 
+                            secondary={userDetails.username || "Not provided"} 
+                          />
+                        </ListItem>
+                        
+                        <ListItem>
+                          <ListItemText 
+                            primary="First Name" 
+                            secondary={userDetails.firstName || "Not provided"} 
+                          />
+                        </ListItem>
+                        
+                        <ListItem>
+                          <ListItemText 
+                            primary="Last Name" 
+                            secondary={userDetails.lastName || "Not provided"} 
+                          />
+                        </ListItem>
+                      </List>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Card>
+              
+              {/* Posts section removed */}
+            </Container>
+          </Container>
+        </>
       ) : null}
       
       <Snackbar 
