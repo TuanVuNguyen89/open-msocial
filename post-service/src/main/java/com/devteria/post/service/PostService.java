@@ -99,6 +99,7 @@ public class PostService {
         String userId = getCurrentUserId();
         UserProfileResponse userProfile = getUserProfileOrThrow(userId);
 
+        page = page + 1;
         // Nếu đang xem bài viết của chính mình
         if (userProfile.getId().equals(targetUserId)) {
             return getMyPosts(page, size);

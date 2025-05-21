@@ -2,15 +2,12 @@ package com.devteria.profile.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.devteria.profile.dto.ApiResponse;
 import com.devteria.profile.dto.request.ProfileCreationRequest;
 import com.devteria.profile.dto.response.UserProfileResponse;
+import com.devteria.profile.dto.response.UserRelationshipResponse;
 import com.devteria.profile.service.UserProfileService;
 import com.devteria.profile.service.UserRelationshipService;
 
@@ -50,6 +47,14 @@ public class InternalUserProfileController {
     public ApiResponse<List<UserProfileResponse>> getUserFriends(@PathVariable String userId) {
         return ApiResponse.<List<UserProfileResponse>>builder()
                 .result(userRelationshipService.getUserFriends(userId))
+                .build();
+    }
+
+    @GetMapping("/internal/relationship/get-relationship")
+    public ApiResponse<UserRelationshipResponse> getRelationships(
+            @RequestParam String userId1, @RequestParam String userId2) {
+        return ApiResponse.<UserRelationshipResponse>builder()
+                .result(userRelationshipService.getRelationship(userId1, userId2))
                 .build();
     }
 }
