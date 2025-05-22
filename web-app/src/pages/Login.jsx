@@ -42,26 +42,17 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    // Generate a random state value for CSRF protection
-    const state = Math.random().toString(36).substring(2, 15) + 
-                 Math.random().toString(36).substring(2, 15);
-    
-    // Store the state in sessionStorage to verify when the user returns
-    sessionStorage.setItem('oauth_state', state);
-    
-    // Construct the authorization URL
-    const scope = 'openid email profile';
-    const authUrl = `${OAuthConfig.authUri}?` +
-      `client_id=${OAuthConfig.clientId}` +
-      `&redirect_uri=${encodeURIComponent(OAuthConfig.redirectUri)}` +
-      `&response_type=code` +
-      `&scope=${encodeURIComponent(scope)}` +
-      `&state=${state}` +
-      `&access_type=offline` +
-      `&prompt=consent`;
-    
-    // Redirect the user to the authorization URL
-    window.location.href = authUrl;
+    const callbackUrl = OAuthConfig.redirectUri;
+    const authUrl = OAuthConfig.authUri;
+    const googleClientId = OAuthConfig.clientId;
+
+    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
+
+    console.log(targetUrl);
+
+    window.location.href = targetUrl;
   };
 
   useEffect(() => {
