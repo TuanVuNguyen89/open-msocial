@@ -11,6 +11,6 @@ import com.devteria.profile.entity.UserProfile;
 public interface UserProfileRepository extends JpaRepository<UserProfile, String> {
 
     Optional<UserProfile> findByUserId(String userId);
-
+    Optional<UserProfile> findByUsername(String username);
     Optional<UserProfile> findById(String Id);
 }

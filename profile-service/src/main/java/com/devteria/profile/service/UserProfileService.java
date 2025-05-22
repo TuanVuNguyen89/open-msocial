@@ -34,6 +34,10 @@ public class UserProfileService {
      */
     public UserProfileResponse createProfile(ProfileCreationRequest request) {
         UserProfile userProfile = userProfileMapper.toUserProfile(request);
+        if (userProfileRepository.findByUsername(userProfile.getUsername()).isPresent()) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
         userProfile = userProfileRepository.save(userProfile);
 
         return userProfileMapper.toUserProfileReponse(userProfile);
