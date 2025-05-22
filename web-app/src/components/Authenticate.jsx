@@ -10,20 +10,12 @@ export default function Authenticate() {
   useEffect(() => {
     console.log(window.location.href);
 
-    // Extract code and state from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get('code');
-    const returnedState = urlParams.get('state');
-    
-    // Get the stored state from sessionStorage
-    const storedState = sessionStorage.getItem('oauth_state');
-    
-    // Clear the stored state
-    sessionStorage.removeItem('oauth_state');
-    
-    // Verify state parameter to prevent CSRF attacks
-    if (authCode && returnedState && returnedState === storedState) {
-      // State is valid, proceed with authentication
+    const authCodeRegex = /code=([^&]+)/;
+    const isMatch = window.location.href.match(authCodeRegex);
+
+    if (isMatch) {
+      const authCode = isMatch[1];
+
       fetch(
         `http://localhost:8080/identity/auth/outbound/authentication?code=${authCode}`,
         {
@@ -31,32 +23,17 @@ export default function Authenticate() {
         }
       )
         .then((response) => {
-          if (!response.ok) {
-            throw new Error('Authentication failed');
-          }
+          console.log("response: ", response);
           return response.json();
         })
         .then((data) => {
-          console.log(data);
+          console.log("data: ", data);
 
           setToken(data.result?.token);
           setIsLoggedin(true);
-        })
-        .catch((error) => {
-          console.error('Authentication error:', error);
-          // Redirect to login page after a short delay
-          setTimeout(() => navigate('/login'), 2000);
         });
-    } else if (authCode) {
-      // State validation failed - potential CSRF attack
-      console.error('OAuth state validation failed');
-      // Redirect to login page after a short delay
-      setTimeout(() => navigate('/login'), 2000);
-    } else {
-      // No auth code in URL, redirect to login
-      navigate('/login');
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     if (isLoggedin) {

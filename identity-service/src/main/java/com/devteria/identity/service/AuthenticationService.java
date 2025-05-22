@@ -5,7 +5,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import com.devteria.event.dto.NotificationEvent;
+import com.devteria.identity.mapper.UserMapper;
+import com.devteria.identity.repository.httpclient.ProfileClient;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +51,9 @@ public class AuthenticationService {
     InvalidatedTokenRepository invalidatedTokenRepository;
     OutboundIdentityClient outboundIdentityClient;
     OutboundUserClient outboundUserClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
+    UserMapper userMapper;
+    ProfileClient profileClient;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -109,11 +118,39 @@ public class AuthenticationService {
         var user = userRepository
                 .findByUsername(userInfo.getEmail())
                 .orElseGet(() -> userRepository.save(User.builder()
+                        .email(userInfo.getEmail())
                         .username(userInfo.getEmail())
                         .firstName(userInfo.getGivenName())
                         .lastName(userInfo.getFamilyName())
                         .roles(roles)
                         .build()));
+
+        var profileRequest = ProfileCreationRequest.builder()
+                        .dob(user.getDob())
+                        .userId(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .avatarUrl(userInfo.getPicture())
+                        .build();
+
+        try {
+            var profile = profileClient.createProfile(profileRequest);
+
+            NotificationEvent notificationEvent = NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(user.getEmail())
+                    .subject("Welcome to Open MSocial")
+                    .body("Hello, " + user.getUsername())
+                    .build();
+
+            // Publish message to kafka
+            kafkaTemplate.send("notification-delivery", notificationEvent);
+        }
+        catch (FeignException ex) {
+            log.info("Existed user");
+        }
 
         // Generate token
         var token = generateToken(user);

@@ -180,21 +180,11 @@ export default function Header() {
             height: "35px",
             borderRadius: 6,
           }}
-          src="/logo/devteria-logo.png"
+          src="/logo/logo.png"
         ></Box>
       </IconButton>
-      <Search>
-        <SearchIconWrapper>
-          <SearchIcon />
-        </SearchIconWrapper>
-        <StyledInputBase
-          placeholder="Search…"
-          inputProps={{ "aria-label": "search" }}
-        />
-      </Search>
       <Box sx={{ flexGrow: 1 }} />
       {/* Đã xóa các biểu tượng ở góc trên bên phải */}
-      {renderMobileMenu}
       {renderMenu}
     </>
   );
