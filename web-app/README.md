@@ -78,7 +78,3 @@ The web application communicates with the backend services through the API Gatew
 - **Comment Service**: Adding comments to posts
 - **Media Service**: Uploading and viewing media
 - **Notification Service**: Receiving notifications
-
-## 🖥️ Available Scripts
-
-In the project directory, you can run:
