@@ -98,7 +98,3 @@ export CLOUDINARY_API_SECRET=your-api-secret
    - Web Application
 
 See individual service README files for detailed manual setup instructions.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
