@@ -55,7 +55,6 @@ public class UserService {
         roleRepository.findById(PredefinedRole.USER_ROLE).ifPresent(roles::add);
 
         user.setRoles(roles);
-        user.setEmailVerified(false);
 
         try {
             user = userRepository.save(user);

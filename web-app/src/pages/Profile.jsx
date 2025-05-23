@@ -35,6 +35,7 @@ import CakeIcon from "@mui/icons-material/Cake";
 import { getMyInfo, updateProfile } from "../services/userService";
 import { isAuthenticated, logOut } from "../services/authenticationService";
 import { uploadMedia } from "../services/mediaService";
+import { formatAvatarUrl, getUserInitials } from "../utils/avatarUtils";
 // Post component import removed
 import Scene from "./Scene";
 
@@ -307,7 +308,7 @@ export default function Profile() {
                     }
                   >
                     <Avatar
-                      src={userDetails.avatarUrl}
+                      src={formatAvatarUrl(userDetails.avatarUrl)}
                       sx={{ 
                         width: 150, 
                         height: 150, 
@@ -318,7 +319,7 @@ export default function Profile() {
                       }}
                       onClick={() => avatarInputRef.current.click()}
                     >
-                      {userDetails.firstName?.charAt(0) || userDetails.username?.charAt(0)}
+                      {getUserInitials(userDetails)}
                     </Avatar>
                     <input
                       type="file"

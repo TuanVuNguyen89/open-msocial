@@ -1,0 +1,208 @@
+version: '3.8'
+
+services:
+  # MySQL Databases
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: oms_identity
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oms-network
+    command: --default-authentication-plugin=mysql_native_password
+    
+  # MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - oms-network
+      
+  # Kafka and Zookeeper
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - oms-network
+      
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+    depends_on:
+      - zookeeper
+    networks:
+      - oms-network
+      
+  # Backend Services
+  identity-service:
+    build: ./identity-service
+    container_name: identity-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_identity
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - APP_SERVICES_PROFILE=http://profile-service:8081/profile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - oms-network
+      
+  profile-service:
+    build: ./profile-service
+    container_name: profile-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_user
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - oms-network
+      
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/notification-service?authSource=admin
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - oms-network
+      
+  post-service:
+    build: ./post-service
+    container_name: post-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/post-service?authSource=admin
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
+    depends_on:
+      - mongodb
+      - kafka
+      - profile-service
+    networks:
+      - oms-network
+      
+  comment-service:
+    build: ./comment-service
+    container_name: comment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/comment-service?authSource=admin
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
+    depends_on:
+      - mongodb
+      - kafka
+      - profile-service
+    networks:
+      - oms-network
+      
+  media-service:
+    build: ./media-service
+    container_name: media-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_media
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
+      - APP_SERVICES_POST_URL=http://post-service:8083/post
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      profile-service:
+        condition: service_started
+      post-service:
+        condition: service_started
+    networks:
+      - oms-network
+      
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_CLOUD_GATEWAY_ROUTES[0].URI=http://identity-service:8080
+      - SPRING_CLOUD_GATEWAY_ROUTES[1].URI=http://profile-service:8081
+      - SPRING_CLOUD_GATEWAY_ROUTES[2].URI=http://notification-service:8082
+      - SPRING_CLOUD_GATEWAY_ROUTES[3].URI=http://post-service:8083
+      - SPRING_CLOUD_GATEWAY_ROUTES[4].URI=http://comment-service:8084
+      - SPRING_CLOUD_GATEWAY_ROUTES[5].URI=http://media-service:8085
+    depends_on:
+      - identity-service
+      - profile-service
+      - notification-service
+      - post-service
+      - comment-service
+      - media-service
+    networks:
+      - oms-network
+      
+  # Frontend
+  web-app:
+    build: ./web-app
+    container_name: web-app
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - oms-network
+
+volumes:
+  mysql-data:
+  mongodb-data:
+
+networks:
+  oms-network:
+    driver: bridge

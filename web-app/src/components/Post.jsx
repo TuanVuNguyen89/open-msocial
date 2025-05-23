@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { formatAvatarUrl, getUserInitials } from "../utils/avatarUtils";
 
 // Function to render content with Markdown and LaTeX support
 const renderContent = (text) => {
@@ -128,13 +129,15 @@ const Post = forwardRef((props, ref) => {
         }}
       >
         <Avatar 
-          src={avatarUrl} 
+          src={formatAvatarUrl(avatarUrl)} 
           sx={{ 
             marginRight: 2,
             cursor: "pointer",
           }} 
           onClick={handleUserClick}
-        />
+        >
+          {!avatarUrl && getUserInitials(user)}
+        </Avatar>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", alignItems: "center", width: "100%", pr: 4 }}>
             <Typography

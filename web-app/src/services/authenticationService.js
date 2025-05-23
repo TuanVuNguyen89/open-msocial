@@ -8,6 +8,7 @@ export const logIn = async (username, password) => {
     password: password,
   });
 
+  console.log("Response body:", response.data);
   setToken(response.data?.result?.token);
 
   return response;
