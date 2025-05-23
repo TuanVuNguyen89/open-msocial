@@ -5,18 +5,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import com.devteria.event.dto.NotificationEvent;
-import com.devteria.identity.mapper.UserMapper;
-import com.devteria.identity.repository.httpclient.ProfileClient;
-import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.devteria.event.dto.NotificationEvent;
 import com.devteria.identity.constant.PredefinedRole;
 import com.devteria.identity.dto.request.*;
 import com.devteria.identity.dto.response.AuthenticationResponse;
@@ -26,16 +22,19 @@ import com.devteria.identity.entity.Role;
 import com.devteria.identity.entity.User;
 import com.devteria.identity.exception.AppException;
 import com.devteria.identity.exception.ErrorCode;
+import com.devteria.identity.mapper.UserMapper;
 import com.devteria.identity.repository.InvalidatedTokenRepository;
 import com.devteria.identity.repository.UserRepository;
 import com.devteria.identity.repository.httpclient.OutboundIdentityClient;
 import com.devteria.identity.repository.httpclient.OutboundUserClient;
+import com.devteria.identity.repository.httpclient.ProfileClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -126,14 +125,14 @@ public class AuthenticationService {
                         .build()));
 
         var profileRequest = ProfileCreationRequest.builder()
-                        .dob(user.getDob())
-                        .userId(user.getId())
-                        .email(user.getEmail())
-                        .username(user.getUsername())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .avatarUrl(userInfo.getPicture())
-                        .build();
+                .dob(user.getDob())
+                .userId(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .avatarUrl(userInfo.getPicture())
+                .build();
 
         try {
             var profile = profileClient.createProfile(profileRequest);
@@ -147,8 +146,7 @@ public class AuthenticationService {
 
             // Publish message to kafka
             kafkaTemplate.send("notification-delivery", notificationEvent);
-        }
-        catch (FeignException ex) {
+        } catch (FeignException ex) {
             log.info("Existed user");
         }
 

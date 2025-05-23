@@ -29,6 +29,7 @@ import {
   useTheme,
   alpha
 } from "@mui/material";
+import { formatAvatarUrl, getUserInitials } from "../utils/avatarUtils";
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
@@ -476,7 +477,7 @@ export default function Friends() {
                       onClick={() => handleViewProfile(friend.id)}
                     >
                       <Avatar 
-                        src={friend.avatarUrl}
+                        src={formatAvatarUrl(friend.avatarUrl)}
                         sx={{ 
                           width: 80, 
                           height: 80, 
@@ -484,7 +485,7 @@ export default function Friends() {
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                       >
-                        {!friend.avatarUrl && (friend.firstName?.charAt(0) || friend.username?.charAt(0))}
+                        {!friend.avatarUrl && getUserInitials(friend)}
                       </Avatar>
                       
                       <Typography 

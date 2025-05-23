@@ -67,7 +67,6 @@ public class ApplicationInitConfig {
                         .firstName("Vu")
                         .lastName("Nguyen")
                         .email("contact@ntuanvu89.id.vn")
-                        .emailVerified(true)
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
                         .roles(roles)
                         .build();
