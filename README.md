@@ -67,7 +67,7 @@ docker-compose up
 ```
 
 This will:
-1. Set up all required infrastructure (MySQL, MongoDB, Kafka, Zookeeper)
+1. Set up all required infrastructure (MySQL, MongoDB, Kafka)
 2. Build and start all backend microservices
 3. Build and start the frontend web application
 4. Configure networking between all components
