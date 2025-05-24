@@ -1,4 +1,4 @@
-# 📘# 💬 Open MSocial - Comment Service
+# 💬 Open MSocial - Comment Service
 
 ## 📌 Overview
 

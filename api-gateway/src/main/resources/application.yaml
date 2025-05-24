@@ -3,6 +3,9 @@ server:
 
 app:
   api-prefix: /api/v1
+  services:
+    identity-service:
+      url: http://localhost:8080/identity
 
 spring:
   application:
@@ -28,7 +31,7 @@ spring:
             - Path=${app.api-prefix}/notification/**
           filters:
             - StripPrefix=2
-        - id: notification_service
+        - id: post_service
           uri: http://localhost:8083
           predicates:
             - Path=${app.api-prefix}/post/**
@@ -40,7 +43,7 @@ spring:
             - Path=${app.api-prefix}/comment/**
           filters:
             - StripPrefix=2
-        - id: comment_service
+        - id: media_service
           uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/media/**

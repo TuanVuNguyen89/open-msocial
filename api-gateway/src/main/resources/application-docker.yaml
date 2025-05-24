@@ -1,0 +1,59 @@
+server:
+  port: 8888
+
+app:
+  api-prefix: /api/v1
+  services:
+    identity-service:
+      url: http://identity-service:8080/identity
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: identity_service
+          uri: http://identity-service:8080
+          predicates:
+            - Path=${app.api-prefix}/identity/**
+          filters:
+            - StripPrefix=2
+        - id: profile_service
+          uri: http://profile-service:8081
+          predicates:
+            - Path=${app.api-prefix}/profile/**
+          filters:
+            - StripPrefix=2
+        - id: notification_service
+          uri: http://notification-service:8082
+          predicates:
+            - Path=${app.api-prefix}/notification/**
+          filters:
+            - StripPrefix=2
+        - id: post_service
+          uri: http://post-service:8083
+          predicates:
+            - Path=${app.api-prefix}/post/**
+          filters:
+            - StripPrefix=2
+        - id: comment_service
+          uri: http://comment-service:8084
+          predicates:
+            - Path=${app.api-prefix}/comment/**
+          filters:
+            - StripPrefix=2
+        - id: media_service
+          uri: http://media-service:8085
+          predicates:
+            - Path=${app.api-prefix}/media/**
+          filters:
+            - StripPrefix=2
+  # THÊM PHẦN CẤU HÌNH BẢO MẬT NÀY VÀO application-docker.yml
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Đây là URI của Identity Service (máy chủ cấp phát token)
+          # Trong môi trường Docker, phải sử dụng tên service của Identity Service
+          issuer-uri: http://identity-service:8080/
+          # Hoặc nếu identity-service của bạn chỉ exposed jwks.json và không phải OpenID Connect Discovery:
+          # jwk-set-uri: http://identity-service:8080/oauth2/jwks # Hoặc .well-known/jwks.json

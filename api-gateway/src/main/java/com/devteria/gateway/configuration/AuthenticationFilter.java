@@ -49,25 +49,35 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("Enter authentication filter....");
+        log.info("Enter authentication filter for path: {}", exchange.getRequest().getURI().getPath()); // THÊM DÒNG NÀY
 
-        if (isPublicEndpoint(exchange.getRequest()))
+        if (isPublicEndpoint(exchange.getRequest())) {
+            log.info("Path is public: {}. Proceeding without authentication.", exchange.getRequest().getURI().getPath()); // THÊM DÒNG NÀY
             return chain.filter(exchange);
+        }
 
-        // Get token from authorization header
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader))
+        if (CollectionUtils.isEmpty(authHeader)) {
+            log.warn("Missing Authorization header for path: {}", exchange.getRequest().getURI().getPath()); // THÊM DÒNG NÀY
             return unauthenticated(exchange.getResponse());
+        }
 
         String token = authHeader.getFirst().replace("Bearer ", "");
-        log.info("Token: {}", token);
+        log.info("Token extracted for path {}: {}", exchange.getRequest().getURI().getPath(), token); // THÊM DÒNG NÀY
 
-        return identityService.introspect(token).flatMap(introspectResponse -> {
-            if (introspectResponse.getResult().isValid())
+        return identityService.introspect(token).flatMap(introspectResponse -> { // SỬA ĐỂ TẠO INTROSPECTREQUEST
+            log.info("Introspect response received for path {}: isValid = {}", exchange.getRequest().getURI().getPath(), introspectResponse.getResult().isValid()); // THÊM DÒNG NÀY
+            if (introspectResponse.getResult().isValid()) {
+                log.info("Token is valid for path: {}. Proceeding with chain.", exchange.getRequest().getURI().getPath());
                 return chain.filter(exchange);
-            else
+            } else {
+                log.warn("Token is invalid for path: {}. Returning unauthenticated.", exchange.getRequest().getURI().getPath());
                 return unauthenticated(exchange.getResponse());
-        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
+            }
+        }).onErrorResume(throwable -> {
+            log.error("Introspection failed for path {}: {}", exchange.getRequest().getURI().getPath(), throwable.getMessage(), throwable); // THÊM DÒNG NÀY
+            return unauthenticated(exchange.getResponse());
+        });
     }
 
     @Override

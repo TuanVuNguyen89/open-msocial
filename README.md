@@ -73,7 +73,7 @@ This will:
 4. Configure networking between all components
 
 The application will be available at:
-- Frontend: http://localhost:80
+- Frontend: http://localhost:3000
 - API Gateway: http://localhost:8888/api/v1
 
 For Cloudinary integration (media service), set these environment variables before running:
@@ -98,7 +98,3 @@ export CLOUDINARY_API_SECRET=your-api-secret
    - Web Application
 
 See individual service README files for detailed manual setup instructions.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
