@@ -1,17 +1,11 @@
-FROM openjdk:21-slim
-
+FROM maven:3.9-eclipse-temurin-21-alpine as build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-COPY target/*.jar app.jar
-
-ENV SERVER_PORT=8085
-ENV CLOUDINARY_CLOUD_NAME=
-ENV CLOUDINARY_API_KEY=
-ENV CLOUDINARY_API_SECRET=
-ENV SPRING_DATASOURCE_URL=
-ENV SPRING_DATASOURCE_USERNAME=
-ENV SPRING_DATASOURCE_PASSWORD=
-
-EXPOSE ${SERVER_PORT}
-
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/media-service-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]

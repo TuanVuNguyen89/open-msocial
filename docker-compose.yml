@@ -1,4 +1,3 @@
-name: open-msocial
 version: '3.8'
 
 services:
@@ -11,8 +10,17 @@ services:
     ports:
       - '3306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: root
-    
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    # THÊM: Health check để đảm bảo MySQL đã sẵn sàng trước khi các service khác kết nối
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "3306", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s # Kiểm tra mỗi 10 giây
+      timeout: 5s   # Thời gian chờ cho mỗi lần kiểm tra
+      retries: 5    # Thử lại 5 lần trước khi báo cáo là unhealthy
+      start_period: 30s # Cho phép MySQL 30 giây để khởi động ban đầu trước khi bắt đầu kiểm tra
+
   # MongoDB
   mongodb:
     image: mongo:8.0.1-noble
@@ -24,7 +32,14 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
-      
+    # THÊM: Health check cho MongoDB
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"] # Lệnh kiểm tra sức khỏe MongoDB
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   # Kafka
   kafka:
     image: 'bitnami/kafka:3.8.0'
@@ -41,30 +56,55 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      
+    # THÊM: Health check cho Kafka
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Backend Services
   identity-service:
     build: ./identity-service
     container_name: identity-service
+    restart: on-failure
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_identity
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_identity?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
       - APP_SERVICES_PROFILE=http://profile-service:8081/profile
-      
+    # THÊM: Đảm bảo mysql và kafka đã healthy trước khi khởi động
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   profile-service:
     build: ./profile-service
     container_name: profile-service
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_user
+      # SỬA: Bổ sung các tham số URL giống như identity-service
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
-      
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    # THÊM: Đảm bảo mysql đã healthy trước khi khởi động
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -73,7 +113,13 @@ services:
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/notification-service?authSource=admin
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
-      
+    # THÊM: Đảm bảo mongodb và kafka đã healthy trước khi khởi động
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   post-service:
     build: ./post-service
     container_name: post-service
@@ -83,7 +129,15 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/post-service?authSource=admin
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
       - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
-      
+    # THÊM: Đảm bảo mongodb, kafka và profile-service đã khởi động
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      profile-service:
+        condition: service_started # Hoặc service_healthy nếu profile-service có healthcheck
+
   comment-service:
     build: ./comment-service
     container_name: comment-service
@@ -93,38 +147,70 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/comment-service?authSource=admin
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
       - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
-      
+    # THÊM: Đảm bảo mongodb, kafka và profile-service đã khởi động
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      profile-service:
+        condition: service_started
+
   media-service:
     build: ./media-service
     container_name: media-service
     ports:
       - "8085:8085"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_media
+      # SỬA: Bổ sung các tham số URL
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/oms_media?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
       - APP_SERVICES_PROFILE_URL=http://profile-service:8081/profile
       - APP_SERVICES_POST_URL=http://post-service:8083/post
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-      
+      - CLOUDINARY_CLOUD_NAME=drgbufm8f
+      - CLOUDINARY_API_KEY=544713746952842
+      - CLOUDINARY_API_SECRET=8LojRmYU-h6cRoSITJ5fYj6iY7Y
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    # THÊM: Đảm bảo mysql, profile-service và post-service đã khởi động
+    depends_on:
+      mysql:
+        condition: service_healthy
+      profile-service:
+        condition: service_started
+      post-service:
+        condition: service_started
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
+    restart: on-failure
     ports:
       - "8888:8888"
     environment:
-      - SPRING_CLOUD_GATEWAY_ROUTES[0].URI=http://identity-service:8080
-      - SPRING_CLOUD_GATEWAY_ROUTES[1].URI=http://profile-service:8081
-      - SPRING_CLOUD_GATEWAY_ROUTES[2].URI=http://notification-service:8082
-      - SPRING_CLOUD_GATEWAY_ROUTES[3].URI=http://post-service:8083
-      - SPRING_CLOUD_GATEWAY_ROUTES[4].URI=http://comment-service:8084
-      - SPRING_CLOUD_GATEWAY_ROUTES[5].URI=http://media-service:8085
-      
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      identity-service:
+        condition: service_started
+      profile-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      post-service:
+        condition: service_started
+      comment-service:
+        condition: service_started
+      media-service:
+        condition: service_started
+
+
   # Frontend
   web-app:
     build: ./web-app
     container_name: web-app
     ports:
-      - "80:80"
+      - "3000:3000"
+    # THÊM: Đảm bảo api-gateway đã khởi động
+    depends_on:
+      api-gateway:
+        condition: service_started
