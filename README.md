@@ -67,7 +67,7 @@ docker-compose up
 ```
 
 This will:
-1. Set up all required infrastructure (MySQL, MongoDB, Kafka, Zookeeper)
+1. Set up all required infrastructure (MySQL, MongoDB, Kafka)
 2. Build and start all backend microservices
 3. Build and start the frontend web application
 4. Configure networking between all components
@@ -96,5 +96,5 @@ export CLOUDINARY_API_SECRET=your-api-secret
 
 2. Start the frontend application:
    - Web Application
-
+   
 See individual service README files for detailed manual setup instructions.
