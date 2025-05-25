@@ -1,78 +1,78 @@
 # 💬 Open MSocial - Comment Feature
 
-## 📌 Tổng quan
+## 📌 Overview
 
-**Tính năng Comment** cho phép người dùng tương tác với các bài đăng trong nền tảng Open MSocial. Hệ thống hỗ trợ tạo, xem, chỉnh sửa và xóa comment, cũng như hiển thị các comment theo cấu trúc phân cấp.
+The **Comment Feature** allows users to interact with posts on the Open MSocial platform. The system supports creating, viewing, editing, and deleting comments, as well as displaying comments in a hierarchical structure.
 
-## ⚙️ Công nghệ sử dụng
+## ⚙️ Technologies Used
 
-- **React**: Thư viện JavaScript để xây dựng giao diện người dùng
-- **Material UI**: Framework UI cho các component
-- **React Router**: Quản lý điều hướng trong ứng dụng
-- **Axios**: Thực hiện các yêu cầu HTTP đến API
+- **React**: JavaScript library for building user interfaces
+- **Material UI**: UI framework for components
+- **React Router**: Navigation management in the application
+- **Axios**: Handling HTTP requests to the API
 
-## 🧩 Mô hình dữ liệu
+## 🧩 Data Model
 
 ### `Comment`
-| Trường        | Kiểu dữ liệu | Mô tả                           |
+| Field         | Data Type    | Description                     |
 |---------------|--------------|----------------------------------|
-| `id`          | string       | Khóa chính                      |
-| `postId`      | string       | ID của bài đăng liên quan       |
-| `content`     | string       | Nội dung văn bản của comment    |
-| `parentId`    | string       | ID của comment cha (nếu là reply) |
-| `createdAt`   | Date         | Thời gian tạo comment           |
-| `updatedAt`   | Date         | Thời gian cập nhật gần nhất     |
-| `user`        | object       | Thông tin người tạo comment     |
-| `pUser`       | object       | Thông tin người được trả lời (nếu là reply) |
+| `id`          | string       | Primary key                     |
+| `postId`      | string       | ID of the associated post       |
+| `content`     | string       | Textual content of the comment  |
+| `parentId`    | string       | ID of parent comment (if reply) |
+| `createdAt`   | Date         | Comment creation timestamp      |
+| `updatedAt`   | Date         | Last update timestamp           |
+| `user`        | object       | Information about comment creator |
+| `pUser`       | object       | Information about replied user (if reply) |
 
-## 🧩 Cấu trúc Component
+## 🧩 Component Structure
 
 ### 1. CommentSection
-Component chính quản lý toàn bộ phần comment của một bài đăng, bao gồm:
-- Hiển thị danh sách comment
-- Phân trang để tải thêm comment
-- Quản lý form tạo comment mới
+Main component managing the entire comment section of a post, including:
+- Displaying the list of comments
+- Pagination for loading more comments
+- Managing the form for creating new comments
 
 ### 2. CommentItem
-Hiển thị một comment đơn lẻ với:
-- Avatar và tên người dùng
-- Nội dung comment với hỗ trợ tag @username
-- Thời gian tạo/cập nhật
-- Các nút tương tác (trả lời, chỉnh sửa, xóa)
-- Hiển thị các comment con (replies) theo cấu trúc cây
+Displays a single comment with:
+- User avatar and username
+- Comment content with @username tag support
+- Creation/update timestamp
+- Interaction buttons (reply, edit, delete)
+- Displaying child comments (replies) in a tree structure
 
 ### 3. CommentForm
-Form để tạo hoặc chỉnh sửa comment:
-- Nhập nội dung comment
-- Hỗ trợ tag @username
-- Xử lý gửi/cập nhật comment
+Form for creating or editing comments:
+- Input for comment content
+- Support for @username tagging
+- Handling comment submission/update submission
 
 ## 📡 API Endpoints
 
-### Quản lý Comment
-- **POST** `/api/comments` - Tạo comment mới
-- **GET** `/api/comments/{commentId}` - Lấy comment theo ID
-- **PUT** `/api/comments/{commentId}` - Cập nhật comment
-- **DELETE** `/api/comments/{commentId}` - Xóa comment
+### Comment Management
+- **POST** `/api/comments` - Create new comment
+- **GET** `/api/comments/{commentId}` - Get comment by ID
+- **PUT** `/api/comments/{commentId}` - Update comment
+- **DELETE** `/api/comments/{commentId}` - Delete comment
 
-### Truy vấn Comment
-- **GET** `/api/posts/{postId}/comments` - Lấy comment cho bài đăng
-- **GET** `/api/comments/{commentId}/replies` - Lấy các reply cho comment
-- **GET** `/api/users/{userId}/comments` - Lấy comment theo người dùng
+### Comment Query
+- **GET** `/api/posts/{postId}/comments` - Get comments for a post
+- **GET** `/api/comments/{commentId}/replies` - Get replies for a comment
+- **GET** `/api/users/{userId}/comments` - Get comments by user
 
-## 🚀 Tính năng chính
+## 🚀 Main Features
 
-1. **Tạo comment mới** trên bài đăng
-2. **Trả lời comment** với hỗ trợ tag @username
-3. **Chỉnh sửa và xóa** comment
-4. **Hiển thị phân cấp** comment theo cấu trúc cây
-5. **Phân trang** để tải thêm comment
-6. **Giao diện thân thiện** với avatar, tên người dùng và thời gian
-7. **Điều hướng đến profile** khi click vào tên người dùng hoặc tag @username
+1. **Create a new comment** on a post
+2. **Reply to a comment** with @username support
+3. **Edit and delete** comment
+4. **Display hierarchical** comment structure
+5. **Pagination** to load additional comments
+6. **Friendly interface** with avatar, username, and timestamp
+7. **Navigate to profile** when clicking on username or @username
 
-## 🔄 Tích hợp với các tính năng khác
+## 🔄 Integration with other features
 
-- **Authentication**: Xác thực người dùng để thực hiện các hành động
-- **Profile**: Hiển thị thông tin người dùng trong comment
-- **Post**: Liên kết comment với bài đăng tương ứng
-- **Notification**: Thông báo cho người dùng về hoạt động comment
+- **Authentication**: User authentication to perform actions
+- **Profile**: Display user information in comments
+- **Post**: Link comments to the corresponding post
+- **Notification**: Notify users about comment activities
