@@ -1,92 +1,78 @@
-# 💬 Open MSocial - Comment Service
+# 💬 Open MSocial - Comment Feature
 
-## 📌 Overview
+## 📌 Tổng quan
 
-The **Comment Service** is responsible for managing comments on posts in the Open MSocial platform. It handles the creation, retrieval, updating, and deletion of comments, as well as nested comment threads.
+**Tính năng Comment** cho phép người dùng tương tác với các bài đăng trong nền tảng Open MSocial. Hệ thống hỗ trợ tạo, xem, chỉnh sửa và xóa comment, cũng như hiển thị các comment theo cấu trúc phân cấp.
 
-## ⚙️ Technologies Used
+## ⚙️ Công nghệ sử dụng
 
-- **Spring Boot 3**: Backend framework for implementing REST APIs
-- **MongoDB**: NoSQL database for storing comment data
-- **Spring Data MongoDB**: For database interaction
-- **Spring Security**: For authentication and authorization
-- **Kafka**: For event-driven communication with other services
+- **React**: Thư viện JavaScript để xây dựng giao diện người dùng
+- **Material UI**: Framework UI cho các component
+- **React Router**: Quản lý điều hướng trong ứng dụng
+- **Axios**: Thực hiện các yêu cầu HTTP đến API
 
-## 🧩 Data Model
+## 🧩 Mô hình dữ liệu
 
 ### `Comment`
-| Field         | Data Type    | Description                     |
+| Trường        | Kiểu dữ liệu | Mô tả                           |
 |---------------|--------------|----------------------------------|
-| `id`          | string       | Primary key                     |
-| `postId`      | string       | ID of the associated post       |
-| `userId`      | string       | ID of the comment creator       |
-| `content`     | string       | Textual content of the comment  |
-| `parentId`    | string       | ID of parent comment (if reply) |
-| `createdAt`   | Date         | Comment creation timestamp      |
-| `updatedAt`   | Date         | Last update timestamp           |
-| `likeCount`   | int          | Number of likes                 |
+| `id`          | string       | Khóa chính                      |
+| `postId`      | string       | ID của bài đăng liên quan       |
+| `content`     | string       | Nội dung văn bản của comment    |
+| `parentId`    | string       | ID của comment cha (nếu là reply) |
+| `createdAt`   | Date         | Thời gian tạo comment           |
+| `updatedAt`   | Date         | Thời gian cập nhật gần nhất     |
+| `user`        | object       | Thông tin người tạo comment     |
+| `pUser`       | object       | Thông tin người được trả lời (nếu là reply) |
+
+## 🧩 Cấu trúc Component
+
+### 1. CommentSection
+Component chính quản lý toàn bộ phần comment của một bài đăng, bao gồm:
+- Hiển thị danh sách comment
+- Phân trang để tải thêm comment
+- Quản lý form tạo comment mới
+
+### 2. CommentItem
+Hiển thị một comment đơn lẻ với:
+- Avatar và tên người dùng
+- Nội dung comment với hỗ trợ tag @username
+- Thời gian tạo/cập nhật
+- Các nút tương tác (trả lời, chỉnh sửa, xóa)
+- Hiển thị các comment con (replies) theo cấu trúc cây
+
+### 3. CommentForm
+Form để tạo hoặc chỉnh sửa comment:
+- Nhập nội dung comment
+- Hỗ trợ tag @username
+- Xử lý gửi/cập nhật comment
 
 ## 📡 API Endpoints
 
-### Comment Management
-- **POST** `/comment/comments` - Create a new comment
-- **GET** `/comment/comments/{commentId}` - Get comment by ID
-- **PUT** `/comment/comments/{commentId}` - Update comment
-- **DELETE** `/comment/comments/{commentId}` - Delete comment
+### Quản lý Comment
+- **POST** `/api/comments` - Tạo comment mới
+- **GET** `/api/comments/{commentId}` - Lấy comment theo ID
+- **PUT** `/api/comments/{commentId}` - Cập nhật comment
+- **DELETE** `/api/comments/{commentId}` - Xóa comment
 
-### Comment Queries
-- **GET** `/comment/posts/{postId}/comments` - Get comments for a post
-- **GET** `/comment/comments/{commentId}/replies` - Get replies to a comment
-- **GET** `/comment/users/{userId}/comments` - Get comments by user
+### Truy vấn Comment
+- **GET** `/api/posts/{postId}/comments` - Lấy comment cho bài đăng
+- **GET** `/api/comments/{commentId}/replies` - Lấy các reply cho comment
+- **GET** `/api/users/{userId}/comments` - Lấy comment theo người dùng
 
-### Comment Interactions
-- **POST** `/comment/comments/{commentId}/like` - Like a comment
-- **DELETE** `/comment/comments/{commentId}/like` - Unlike a comment
+## 🚀 Tính năng chính
 
-## 🚀 How to Run
+1. **Tạo comment mới** trên bài đăng
+2. **Trả lời comment** với hỗ trợ tag @username
+3. **Chỉnh sửa và xóa** comment
+4. **Hiển thị phân cấp** comment theo cấu trúc cây
+5. **Phân trang** để tải thêm comment
+6. **Giao diện thân thiện** với avatar, tên người dùng và thời gian
+7. **Điều hướng đến profile** khi click vào tên người dùng hoặc tag @username
 
-### Prerequisites
-- Java 21
-- Maven
-- MongoDB
-- Kafka (optional, for event processing)
+## 🔄 Tích hợp với các tính năng khác
 
-### Local Development
-1. Ensure MongoDB is running and accessible with credentials in `application.yaml`
-2. Run the service:
-```bash
-mvn spring-boot:run
-```
-
-### Using Docker
-1. Build the Docker image:
-```bash
-docker build -t comment-service .
-```
-
-2. Run the container:
-```bash
-docker run -p 8084:8084 \
-  -e SPRING_DATA_MONGODB_URI=mongodb://root:root@host.docker.internal:27017/comment-service?authSource=admin \
-  -e APP_SERVICES_PROFILE_URL=http://host.docker.internal:8081/profile \
-  comment-service
-```
-
-### Using Docker Compose
-The service can be run as part of the entire application stack:
-```bash
-# From the root directory
-docker-compose up comment-service
-```
-
-For the entire stack:
-```bash
-docker-compose up
-```
-
-## 🔄 Integration with Other Services
-
-- **Identity Service**: User authentication and authorization
-- **Profile Service**: User information for comments
-- **Post Service**: Posts that comments are associated with
-- **Notification Service**: Notifications for comment activities
+- **Authentication**: Xác thực người dùng để thực hiện các hành động
+- **Profile**: Hiển thị thông tin người dùng trong comment
+- **Post**: Liên kết comment với bài đăng tương ứng
+- **Notification**: Thông báo cho người dùng về hoạt động comment
