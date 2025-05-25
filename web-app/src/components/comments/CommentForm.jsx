@@ -25,7 +25,7 @@ const CommentForm = ({ postId, currentUser, parentComment = null, onCommentAdded
       const response = await createComment(commentData);
       
       // Kiểm tra cấu trúc dữ liệu trả về từ API
-      console.log('Comment response:', response.data.result );
+      //console.log('Comment response:', response.data.result );
       
       if (response.data.result) {
         // Đảm bảo thêm thông tin người dùng hiện tại vào comment trước khi gửi lên
