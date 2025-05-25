@@ -1,96 +1,83 @@
-# 🖼️ Open MSocial - Media Service
+# 💼️ Open MSocial - Media Feature
 
 ## 📌 Overview
 
-The **Media Service** is responsible for handling media files (images, videos) in the Open MSocial platform. It manages the upload, storage, retrieval, and association of media files with users and posts.
+The **Media Feature** allows users to upload, view, and manage media files (images, videos) in the Open MSocial platform. It provides functionality for attaching media to posts, viewing media in profiles, and handling media in the user interface.
 
 ## ⚙️ Technologies Used
 
-- **Spring Boot 3**: Backend framework for implementing REST APIs
-- **MySQL**: Database for storing media metadata
-- **Spring Data JPA**: For database interaction
-- **Spring Security**: For authentication and authorization
-- **Cloudinary**: Cloud service for storing and serving media files
+- **React**: JavaScript library for building user interfaces
+- **Material UI**: UI framework for components
+- **React Router**: Navigation management in the application
+- **Axios**: Handling HTTP requests to the API
+- **Cloudinary SDK**: Client-side integration with Cloudinary services
 
 ## 🧩 Data Model
 
 ### `Media`
-| Field         | Data Type    | Description                    |
-|---------------|--------------|--------------------------------|
-| `id`          | string (UUID)| Primary key                    |
-| `userId`      | string       | ID of the media owner          |
-| `type`        | enum         | IMAGE, VIDEO, etc.             |
-| `url`         | string       | Public URL to access the media |
-| `thumbnailUrl`| string       | Thumbnail URL (for videos)     |
-| `cloudinaryId`| string       | ID in the cloud storage        |
-| `createdAt`   | Date         | Creation timestamp             |
-| `metadata`    | JSON         | Additional metadata            |
+| Field             | Data Type    | Description                    |
+|-------------------|--------------|--------------------------------|
+| `id`              | string (UUID)| Primary key                    |
+| `url`             | string       | Public URL to access the media |
+| `publicId`        | string       | Public ID in Cloudinary        |
+| `type`            | string       | Media type (image, video)      |
+| `format`          | string       | File format (jpg, png, etc.)   |
+| `size`            | number       | Size of the media in bytes     |
+| `width`           | number       | Width of the media             |
+| `height`          | number       | Height of the media            |
+| `duration`        | number       | Duration for videos (seconds)  |
+| `originalFilename`| string       | Original filename              |
+| `userId`          | string       | ID of the user who uploaded    |
+| `createdAt`       | Date         | Creation timestamp             |
+
+## 🧩 Component Structure
+
+### 1. MediaUploader
+Component for uploading media files:
+- File selection interface
+- Preview of selected files
+- Upload progress indicator
+- Support for drag and drop
+
+### 2. MediaViewer
+Displays media content with:
+- Responsive image/video display
+- Lightbox for full-screen viewing
+- Navigation controls for multiple media items
+- Support for different media types
+
+### 3. MediaGallery
+Grid display of multiple media items:
+- Thumbnail previews
+- Lazy loading for performance
+- Filtering and sorting options
+- Selection functionality
 
 ## 📡 API Endpoints
 
 ### Media Management
-- **POST** `/media/upload` - Upload new media file
-- **GET** `/media/{mediaId}` - Get media details
-- **DELETE** `/media/{mediaId}` - Delete media
+- **POST** `/api/media/upload` - Upload new media file
+- **GET** `/api/media/{mediaId}` - Get media details
+- **DELETE** `/api/media/{mediaId}` - Delete media
 
 ### Media Queries
-- **GET** `/media/user/{userId}` - Get media by user
-- **GET** `/media/post/{postId}` - Get media associated with a post
+- **GET** `/api/media/user/{userId}` - Get media by user
+- **GET** `/api/media/post/{postId}` - Get media associated with a post
 
-## 🚀 How to Run
+## 🚀 Key Features
 
-### Prerequisites
-- Java 21
-- Maven
-- MySQL
-- Cloudinary account (for production)
+1. **Media upload** with drag-and-drop support
+2. **Multiple file types** including images and videos
+3. **Preview functionality** before uploading
+4. **Responsive display** across different devices
+5. **Gallery view** for browsing multiple media items
+6. **Lightbox viewing** for full-screen media display
+7. **Media management** including deletion and organization
+8. **Integration with posts** for attaching media to content
 
-### Environment Variables
-The following environment variables need to be set:
-- `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
-- `CLOUDINARY_API_KEY` - Your Cloudinary API key
-- `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
+## 🔄 Integration with Other Features
 
-### Local Development
-1. Ensure MySQL is running and accessible with credentials in `application.yaml`
-2. Set the Cloudinary environment variables
-3. Run the service:
-```bash
-mvn spring-boot:run
-```
-
-### Using Docker
-1. Build the Docker image:
-```bash
-docker build -t media-service .
-```
-
-2. Run the container:
-```bash
-docker run -p 8085:8085 \
-  -e SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/oms_media \
-  -e SPRING_DATASOURCE_USERNAME=root \
-  -e SPRING_DATASOURCE_PASSWORD=123456 \
-  -e CLOUDINARY_CLOUD_NAME=your-cloud-name \
-  -e CLOUDINARY_API_KEY=your-api-key \
-  -e CLOUDINARY_API_SECRET=your-api-secret \
-  media-service
-```
-
-### Using Docker Compose
-The service can be run as part of the entire application stack:
-```bash
-# From the root directory
-docker-compose up media-service
-```
-
-For the entire stack:
-```bash
-docker-compose up
-```
-
-## 🔄 Integration with Other Services
-
-- **Identity Service**: User authentication and authorization
-- **Profile Service**: User information for media ownership
-- **Post Service**: Association of media with posts
+- **Authentication**: User authentication for media operations
+- **Profile**: Displaying user media in profiles
+- **Post**: Attaching media to posts
+- **Comment**: Referencing media in comments

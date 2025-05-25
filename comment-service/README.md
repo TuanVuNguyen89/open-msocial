@@ -60,19 +60,19 @@ Form for creating or editing comments:
 - **GET** `/api/comments/{commentId}/replies` - Get replies for a comment
 - **GET** `/api/users/{userId}/comments` - Get comments by user
 
-## 🚀 Main Features
+## 🚀 Key Features
 
-1. **Create a new comment** on a post
-2. **Reply to a comment** with @username support
-3. **Edit and delete** comment
-4. **Display hierarchical** comment structure
-5. **Pagination** to load additional comments
-6. **Friendly interface** with avatar, username, and timestamp
-7. **Navigate to profile** when clicking on username or @username
+1. **Creating new comments** on posts
+2. **Replying to comments** with @username tag support
+3. **Editing and deleting** comments
+4. **Hierarchical display** of comments in a tree structure
+5. **Pagination** for loading more comments
+6. **User-friendly interface** with avatars, usernames, and timestamps
+7. **Profile navigation** when clicking on usernames or @username tags
 
-## 🔄 Integration with other features
+## 🔄 Integration with Other Features
 
-- **Authentication**: User authentication to perform actions
-- **Profile**: Display user information in comments
-- **Post**: Link comments to the corresponding post
-- **Notification**: Notify users about comment activities
+- **Authentication**: User authentication for performing actions
+- **Profile**: Displaying user information in comments
+- **Post**: Linking comments to corresponding posts
+- **Notification**: Notifying users about comment activities
