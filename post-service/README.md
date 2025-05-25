@@ -2,13 +2,13 @@
 
 ## 📌 Overview
 
-The **Post Service** is responsible for managing user posts in the Open MSocial platform. It handles the creation, retrieval, updating, and deletion of posts, as well as interactions with posts.
+The **Post Service** is responsible for managing user posts in the Open MSocial platform. It handles the creation, retrieval, updating, and deletion of posts, as well as managing post visibility based on user relationships.
 
 ## ⚙️ Technologies Used
 
-- **Spring Boot 3**: Backend framework for implementing REST APIs
+- **Spring Boot**: Backend framework for implementing REST APIs
 - **MongoDB**: NoSQL database for storing post data
-- **Spring Data MongoDB**: For database interaction
+- **Spring Data MongoDB**: For database interaction and repository support
 - **Spring Security**: For authentication and authorization
 - **Kafka**: For event-driven communication with other services
 
@@ -20,31 +20,31 @@ The **Post Service** is responsible for managing user posts in the Open MSocial 
 | `id`          | string       | Primary key                    |
 | `userId`      | string       | ID of the post creator         |
 | `content`     | string       | Textual content of the post    |
-| `mediaIds`    | List<string> | Associated media IDs           |
-| `tags`        | List<string> | Hashtags in the post           |
-| `createdAt`   | Date         | Post creation timestamp        |
-| `updatedAt`   | Date         | Last update timestamp          |
-| `likeCount`   | int          | Number of likes                |
-| `commentCount`| int          | Number of comments             |
-| `visibility`  | enum         | PUBLIC, FRIENDS, PRIVATE       |
+| `createdDate` | Instant      | Post creation timestamp        |
+| `modifiedDate`| Instant      | Last update timestamp          |
+| `visibility`  | Visibility   | PUBLIC, FRIENDS, PRIVATE       |
+
+### `Visibility`
+Enum with values:
+- `PUBLIC`: Visible to all users
+- `FRIENDS`: Visible only to friends
+- `PRIVATE`: Visible only to the creator
 
 ## 📡 API Endpoints
 
 ### Post Management
-- **POST** `/post/posts` - Create a new post
-- **GET** `/post/posts/{postId}` - Get post by ID
-- **PUT** `/post/posts/{postId}` - Update post
-- **DELETE** `/post/posts/{postId}` - Delete post
-
-### Post Interactions
-- **POST** `/post/posts/{postId}/like` - Like a post
-- **DELETE** `/post/posts/{postId}/like` - Unlike a post
-- **GET** `/post/posts/{postId}/likes` - Get users who liked a post
+- **POST** `/post/create` - Create a new post
+- **GET** `/post/{postId}` - Get post by ID
+- **PUT** `/post/{postId}` - Update post
+- **DELETE** `/post/{postId}` - Delete post
 
 ### Post Discovery
-- **GET** `/post/users/{userId}/posts` - Get posts by user
-- **GET** `/post/feed` - Get posts for current user's feed
-- **GET** `/post/posts/trending` - Get trending posts
+- **GET** `/post/my-posts` - Get current user's posts (paginated)
+- **GET** `/post/user-posts/{userId}` - Get posts by user (paginated)
+- **GET** `/post/get-feed` - Get posts for current user's feed (paginated)
+
+### Internal API
+- **GET** `/post/internal/{postId}` - Get post by ID (service-to-service)
 
 ## 🔄 Kafka Events
 
@@ -56,7 +56,7 @@ The **Post Service** is responsible for managing user posts in the Open MSocial 
 ## 🚀 How to Run
 
 ### Prerequisites
-- Java 21
+- Java
 - Maven
 - MongoDB
 - Kafka
@@ -99,7 +99,5 @@ docker-compose up
 ## 🔄 Integration with Other Services
 
 - **Identity Service**: User authentication and authorization
-- **Profile Service**: User information for posts
-- **Comment Service**: Comments on posts
-- **Media Service**: Media attachments in posts
+- **Profile Service**: User information for posts and friendship verification
 - **Notification Service**: Notifications for post interactions

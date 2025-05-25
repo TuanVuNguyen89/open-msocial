@@ -114,7 +114,7 @@ const Post = forwardRef((props, ref) => {
       try {
         const response = await getMyInfo();
         if (response.data && response.data.result) {
-          console.log("USER: ", response.data.result);
+          //console.log("USER: ", response.data.result);
           setCurrentUser(response.data.result);
         }
       } catch (error) {
