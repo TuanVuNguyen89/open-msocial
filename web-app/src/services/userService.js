@@ -138,3 +138,15 @@ export const cancelFriendRequest = async (receiverId) => {
       }
     );
 };
+
+// Hàm mới để tìm kiếm người dùng theo username
+export const searchUserByUsername = async (username) => {
+    return await httpClient.get(
+      API.SEARCH_USER_BY_USERNAME.replace("{username}", username),
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        }
+      }
+    );
+};

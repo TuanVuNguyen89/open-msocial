@@ -31,6 +31,13 @@ public class UserProfileController {
                 .build();
     }
 
+    @GetMapping("/search")
+    ApiResponse<UserProfileResponse> getProfileByUsername(@RequestParam String username) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .result(userProfileService.getByUsername(username))
+                .build();
+    }
+
     /**
      * Get all user profiles (admin only)
      */

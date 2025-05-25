@@ -9,7 +9,7 @@ import com.devteria.comment.entity.Comment;
 public interface CommentRepository extends MongoRepository<Comment, String> {
     void deleteByPostId(String postId);
 
-    Page<Comment> findByPostIdOrderByCreatedAtDesc(String postId, Pageable pageable);
+    Page<Comment> findByPostIdOrderByCreatedAtAsc(String postId, Pageable pageable);
 
     Page<Comment> findByRootIdOrderByCreatedAtAsc(String rootId, Pageable pageable);
 
