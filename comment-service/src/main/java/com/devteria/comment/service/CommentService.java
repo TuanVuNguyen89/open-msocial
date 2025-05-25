@@ -124,8 +124,8 @@ public class CommentService {
     }
 
     public PageResponseDTO<CommentResponse> getAllCommentsByPostIdPaginated(String postId, PageRequestDTO pageRequest) {
-        var pageable = pageRequest.toPageRequest(Sort.by(Sort.Direction.DESC, "createdAt"));
-        var commentsPage = commentRepository.findByPostIdOrderByCreatedAtDesc(postId, pageable);
+        var pageable = pageRequest.toPageRequest(Sort.by(Sort.Direction.ASC, "createdAt"));
+        var commentsPage = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
 
         var commentResponses = commentsPage.map(this::mapToResponse);
         return PageResponseDTO.from(commentResponses);

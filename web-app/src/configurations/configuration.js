@@ -28,7 +28,17 @@ export const API = {
   GET_POST_BY_ID: "/post/{postId}",
   UPDATE_POST: "/post/{postId}",
   DELETE_POST: "/post/{postId}",
-  GET_FEED: "/post/get-feed"
+  GET_FEED: "/post/get-feed",
+  // Comment API endpoints
+  CREATE_COMMENT: "/comment/create",
+  UPDATE_COMMENT: "/comment/update/{id}",
+  DELETE_COMMENT: "/comment/delete/{id}",
+  GET_ROOT_COMMENT_BY_POST_ID: "/comment/post/{postId}/paginated",
+  GET_REPLIES_BY_ROOT_COMMENT_ID: "/comment/root/{rootId}/paginated",
+  GET_ALL_COMMENTS_BY_POST_ID: "/comment/post/{postId}/all/paginated",
+  
+  // User search API endpoint
+  SEARCH_USER_BY_USERNAME: "/profile/users/search?username={username}"
 };
 
 export const OAuthConfig = {

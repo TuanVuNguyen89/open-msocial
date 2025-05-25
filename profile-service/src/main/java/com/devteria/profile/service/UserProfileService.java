@@ -55,6 +55,17 @@ public class UserProfileService {
     }
 
     /**
+     * Get user profile by user ID (from auth system)
+     */
+    public UserProfileResponse getByUsername(String username) {
+        UserProfile userProfile = userProfileRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return userProfileMapper.toUserProfileReponse(userProfile);
+    }
+
+    /**
      * Get user profile by profile ID
      */
     public UserProfileResponse getProfile(String id) {

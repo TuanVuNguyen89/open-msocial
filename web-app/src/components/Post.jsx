@@ -1,5 +1,5 @@
 import { Box, Avatar, Typography, Card, Paper } from "@mui/material";
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import 'katex/dist/katex.min.css';
@@ -7,6 +7,8 @@ import { InlineMath, BlockMath } from 'react-katex';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { formatAvatarUrl, getUserInitials } from "../utils/avatarUtils";
+import CommentSection from "./comments/CommentSection";
+import { getMyInfo } from "../services/userService";
 
 // Function to render content with Markdown and LaTeX support
 const renderContent = (text) => {
@@ -93,9 +95,11 @@ const renderContent = (text) => {
 };
 
 const Post = forwardRef((props, ref) => {
-  const { content, created, createdDate, visibility } = props.post;
+  const { content, created, createdDate, visibility, id: postId } = props.post;
   const user = props.post.user || {};
   const { avatarUrl, username, id: userId } = user;
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showComments, setShowComments] = useState(true);
   
   const navigate = useNavigate();
   
@@ -103,6 +107,23 @@ const Post = forwardRef((props, ref) => {
   const formattedDate = createdDate ? 
     formatDistanceToNow(new Date(createdDate), { addSuffix: true }) : 
     created;
+  
+  // Fetch current user information
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await getMyInfo();
+        if (response.data && response.data.result) {
+          console.log("USER: ", response.data.result);
+          setCurrentUser(response.data.result);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
   
   const handleUserClick = () => {
     if (userId) {
@@ -194,6 +215,11 @@ const Post = forwardRef((props, ref) => {
           >
             {renderContent(content)}
           </Box>
+          
+          {/* Comment Section */}
+          {postId && showComments && currentUser && (
+            <CommentSection postId={postId} currentUser={currentUser} />
+          )}
         </Box>
       </Box>
     </Card>
