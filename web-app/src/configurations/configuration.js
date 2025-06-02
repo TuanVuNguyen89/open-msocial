@@ -14,6 +14,7 @@ export const API = {
   REJECT_FRIEND_REQUEST: "/profile/relationship/reject-friend-request/{senderId}",
   REMOVE_FRIEND: "/profile/relationship/remove-friend/{friendId}",
   LIST_FRIENDS: "/profile/relationship/friends/{userId}",
+  FRIEND_SUGGESTIONS: "/profile/relationship/friend-suggestions",
   REGISTRATION: "/identity/users/registration",
   SEND_FRIEND_REQUEST: "/profile/relationship/send-friend-request/{receiverId}",
   GET_RELATIONSHIP: "/profile/relationship/get-relationship",

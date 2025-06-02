@@ -41,7 +41,7 @@ public class EmailService {
                         .subject(request.getSubject())
                         .build()))
                 .content(List.of(Content.builder()
-                        .type("text/plain")
+                        .type("text/html")
                         .value(request.getContent())
                         .build()))
                 .build();

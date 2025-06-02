@@ -230,4 +230,25 @@ public class UserRelationshipService {
         var me = userProfileService.getMyProfile();
         return getUserFriends(me.getId(), pageable);
     }
+
+    public Page<UserProfileResponse> getFriendSuggestions(Pageable pageable) {
+        var me = userProfileService.getMyProfile();
+
+        var suggestions = userRelationshipRepository.findUsersNotConnected(me.getId(), pageable);
+
+        var suggestionResponses = suggestions
+                .map(profile -> UserProfileResponse.builder()
+                        .id(profile.getId())
+                        .username(profile.getUsername())
+                        .email(profile.getEmail())
+                        .firstName(profile.getFirstName())
+                        .lastName(profile.getLastName())
+                        .dob(profile.getDob())
+                        .city(profile.getCity())
+                        .build())
+                .stream()
+                .toList();
+
+        return new PageImpl<>(suggestionResponses, pageable, suggestions.getTotalElements());
+    }
 }

@@ -150,3 +150,15 @@ export const searchUserByUsername = async (username) => {
       }
     );
 };
+
+export const getFriendSuggestions = async (page) => {
+    return await httpClient.get(API.FRIEND_SUGGESTIONS, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      params: {
+        page: page.number ?? 0,
+        size: page.size ?? 10,
+      },
+    });
+};

@@ -1,5 +1,6 @@
 package com.devteria.profile.entity;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
@@ -33,4 +34,6 @@ public class UserProfile {
 
     String avatarUrl;
     String backgroundUrl;
+
+    Instant createdDate;
 }

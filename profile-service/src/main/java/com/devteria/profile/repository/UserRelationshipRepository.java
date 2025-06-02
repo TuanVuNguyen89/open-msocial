@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.devteria.profile.entity.RelationshipType;
+import com.devteria.profile.entity.UserProfile;
 import com.devteria.profile.entity.UserRelationship;
 
 @Repository
@@ -48,4 +49,20 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
             @Param("receiverId") String receiverId,
             @Param("relationshipType") RelationshipType relationshipType,
             Pageable pageable);
+
+    @Query(
+            """
+	SELECT DISTINCT up FROM UserProfile up
+	WHERE up.id != :currentUserId
+	AND up.id NOT IN (
+		SELECT CASE
+			WHEN ur.senderId = :currentUserId THEN ur.receiverId
+			ELSE ur.senderId
+		END
+		FROM UserRelationship ur
+		WHERE (ur.senderId = :currentUserId OR ur.receiverId = :currentUserId)
+	)
+	ORDER BY up.createdDate DESC
+	""")
+    Page<UserProfile> findUsersNotConnected(@Param("currentUserId") String currentUserId, Pageable pageable);
 }
