@@ -22,15 +22,10 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleIcon from "@mui/icons-material/People";
 import PersonIcon from "@mui/icons-material/Person";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
-import MessageIcon from "@mui/icons-material/Message";
-import ExploreIcon from "@mui/icons-material/Explore";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 // Services
-import { getMyInfo } from "../services/userService";
 import { logOut, isAuthenticated } from "../services/authenticationService";
 import useUserInfo from "../hooks/useUserInfo";
 
@@ -41,7 +36,7 @@ function SideMenu() {
   
   // Sử dụng hook useUserInfo để lấy thông tin người dùng
   const { userInfo, loadingUserInfo } = useUserInfo();
-  const [notificationCount, setNotificationCount] = useState(3); // Example notification count
+  // Removed notification count state
 
   // Handle logout
   const handleLogout = () => {
@@ -53,17 +48,12 @@ function SideMenu() {
   const mainNavItems = isAuthenticated() ? [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Friends", icon: <PeopleIcon />, path: "/friends" },
-    { text: "Messages", icon: <MessageIcon />, path: "/messages", badge: 5 },
-    { text: "Notifications", icon: <NotificationsIcon />, path: "/notifications", badge: notificationCount },
-    { text: "Explore", icon: <ExploreIcon />, path: "/explore" },
+    { text: "Friend Suggestions", icon: <GroupAddIcon />, path: "/friend-suggestions" },
   ] : [
     { text: "Login", icon: <PersonIcon />, path: "/login" },
   ];
 
-  const secondaryNavItems = isAuthenticated() ? [
-    { text: "Saved Posts", icon: <BookmarkIcon />, path: "/saved" },
-    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
-  ] : [];
+  const secondaryNavItems = isAuthenticated() ? [] : [];
 
   // Check if a nav item is active
   const isActive = (path) => {

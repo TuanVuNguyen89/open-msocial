@@ -1,11 +1,15 @@
 package com.devteria.identity.service;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,7 +83,13 @@ public class AuthenticationService {
     protected String REDIRECT_URI;
 
     @NonFinal
+    @Value("${app.frontend-url}")
+    protected String FRONTEND_URL;
+
+    @NonFinal
     protected final String GRANT_TYPE = "authorization_code";
+
+    ResourceLoader resourceLoader;
 
     public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
@@ -140,8 +150,8 @@ public class AuthenticationService {
             NotificationEvent notificationEvent = NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(user.getEmail())
-                    .subject("Welcome to Open MSocial")
-                    .body("Hello, " + user.getUsername())
+                    .subject("Welcome to Open MSocial - Let's Get Started!")
+                    .body(getWelcomeEmailTemplate(user.getUsername(), FRONTEND_URL))
                     .build();
 
             // Publish message to kafka
@@ -154,6 +164,20 @@ public class AuthenticationService {
         var token = generateToken(user);
 
         return AuthenticationResponse.builder().token(token).build();
+    }
+
+    // Helper method
+    public String getWelcomeEmailTemplate(String username, String platformUrl) {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:template/WelcomeEmailTemplate.html");
+            String template = Files.readString(Paths.get(resource.getURI()));
+
+            return template.replace("[USERNAME]", username).replace("[PLATFORM_URL]", platformUrl);
+
+        } catch (Exception e) {
+            log.error("Failed to load welcome email template", e);
+            throw new RuntimeException("Could not load email template", e);
+        }
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -213,7 +237,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId())
-                .issuer("devteria.com")
+                .issuer("ntuanvu89.id.vn")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))

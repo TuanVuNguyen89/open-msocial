@@ -1,5 +1,6 @@
 package com.devteria.profile.service;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +39,7 @@ public class UserProfileService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        userProfile.setCreatedDate(Instant.now());
         userProfile = userProfileRepository.save(userProfile);
 
         return userProfileMapper.toUserProfileReponse(userProfile);

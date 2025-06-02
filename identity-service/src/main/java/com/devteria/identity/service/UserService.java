@@ -1,8 +1,12 @@
 package com.devteria.identity.service;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +48,7 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     ProfileClient profileClient;
     KafkaTemplate<String, Object> kafkaTemplate;
+    ResourceLoader resourceLoader;
 
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) throw new AppException(ErrorCode.USER_EXISTED);
@@ -70,8 +75,8 @@ public class UserService {
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("EMAIL")
                 .recipient(request.getEmail())
-                .subject("Welcome to Open MSocial")
-                .body("Hello, " + request.getUsername())
+                .subject("Welcome to Open MSocial - Let's Get Started!")
+                .body(getWelcomeEmailTemplate(request.getUsername(), "http://localhost:3000"))
                 .build();
 
         // Publish message to kafka
@@ -81,6 +86,20 @@ public class UserService {
         userCreationReponse.setId(profile.getResult().getId());
 
         return userCreationReponse;
+    }
+
+    // Helper method
+    public String getWelcomeEmailTemplate(String username, String platformUrl) {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:template/WelcomeEmailTemplate.html");
+            String template = Files.readString(Paths.get(resource.getURI()));
+
+            return template.replace("[USERNAME]", username).replace("[PLATFORM_URL]", platformUrl);
+
+        } catch (Exception e) {
+            log.error("Failed to load welcome email template", e);
+            throw new RuntimeException("Could not load email template", e);
+        }
     }
 
     public UserResponse getMyInfo() {

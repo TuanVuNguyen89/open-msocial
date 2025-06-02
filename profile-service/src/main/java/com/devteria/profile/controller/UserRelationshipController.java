@@ -82,4 +82,11 @@ public class UserRelationshipController {
                 .result(userRelationshipService.getMyUserFriends(pageable))
                 .build();
     }
+
+    @GetMapping("friend-suggestions")
+    public ApiResponse<Page<UserProfileResponse>> getFriendSuggestions(Pageable pageable) {
+        return ApiResponse.<Page<UserProfileResponse>>builder()
+                .result(userRelationshipService.getFriendSuggestions(pageable))
+                .build();
+    }
 }
