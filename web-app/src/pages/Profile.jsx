@@ -239,7 +239,7 @@ export default function Profile() {
           <Box
             sx={{
               position: 'relative',
-              height: '300px',
+              height: { xs: '200px', sm: '250px', md: '300px' },
               width: '100%',
               background: userDetails.backgroundUrl 
                 ? `url(${userDetails.backgroundUrl})` 
@@ -292,30 +292,42 @@ export default function Profile() {
                 pb: 3,
                 color: 'white'
               }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'center', sm: 'flex-end' }, 
+                  gap: { xs: 1, sm: 2, md: 3 },
+                  width: '100%'
+                }}>
                   <Badge
                     overlap="circular"
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                     badgeContent={
                       <IconButton
-                        sx={{ backgroundColor: 'white', '&:hover': { backgroundColor: '#f5f5f5' } }}
+                        sx={{ 
+                          backgroundColor: 'white', 
+                          '&:hover': { backgroundColor: '#f5f5f5' },
+                          width: { xs: '24px', sm: '32px' },
+                          height: { xs: '24px', sm: '32px' }
+                        }}
                         size="small"
                         onClick={() => avatarInputRef.current.click()}
                         disabled={uploadingAvatar}
                       >
-                        {uploadingAvatar ? <CircularProgress size={16} /> : <PhotoCameraIcon fontSize="small" />}
+                        {uploadingAvatar ? <CircularProgress size={16} /> : <PhotoCameraIcon sx={{ fontSize: { xs: '14px', sm: '16px' } }} />}
                       </IconButton>
                     }
                   >
                     <Avatar
                       src={formatAvatarUrl(userDetails.avatarUrl)}
                       sx={{ 
-                        width: 150, 
-                        height: 150, 
-                        border: '5px solid white',
+                        width: { xs: 100, sm: 130, md: 150 }, 
+                        height: { xs: 100, sm: 130, md: 150 }, 
+                        border: { xs: '3px solid white', sm: '4px solid white', md: '5px solid white' },
                         boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
                         cursor: 'pointer',
-                        '&:hover': { opacity: 0.9 }
+                        '&:hover': { opacity: 0.9 },
+                        marginTop: { xs: '-50px', sm: 0 }
                       }}
                       onClick={() => avatarInputRef.current.click()}
                     >
@@ -330,11 +342,29 @@ export default function Profile() {
                     />
                   </Badge>
                   
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="h3" fontWeight="bold" sx={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                  <Box sx={{ 
+                    mb: { xs: 0, sm: 2 },
+                    mt: { xs: 1, sm: 0 },
+                    textAlign: { xs: 'center', sm: 'left' }
+                  }}>
+                    <Typography 
+                      variant="h3" 
+                      fontWeight="bold" 
+                      sx={{ 
+                        textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+                      }}
+                    >
                       {userDetails.firstName} {userDetails.lastName}
                     </Typography>
-                    <Typography variant="h6" sx={{ opacity: 0.9, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        opacity: 0.9, 
+                        textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                        fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' }
+                      }}
+                    >
                       @{userDetails.username}
                     </Typography>
                   </Box>
@@ -343,13 +373,26 @@ export default function Profile() {
             </Container>
           </Box>
           
-          <Container maxWidth="lg" sx={{ mt: 2 }}>
+          <Container 
+            maxWidth="lg" 
+            sx={{ 
+              mt: { xs: 1, sm: 2 }, 
+              px: { xs: 1, sm: 2, md: 3 },
+              position: 'relative',
+              zIndex: 3
+            }}
+          >
+            {/* Khoảng trống để avatar có thể nhô lên */}
+            <Box sx={{ height: { xs: 60, sm: 0 } }} />
+            
             {/* Action Buttons */}
             <Box sx={{ 
               display: 'flex', 
-              justifyContent: 'flex-end',
+              justifyContent: { xs: 'center', sm: 'flex-end' },
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
               gap: 1,
-              mb: 3
+              mb: 3,
+              mt: { xs: 4, sm: 2 }
             }}>
               {isEditing ? (
                 <>
@@ -393,23 +436,46 @@ export default function Profile() {
             </Box>
             
             {/* Profile Content */}
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
               {/* User Information Card */}
-              <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-                <Box sx={{ p: 3 }}>
+              <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', mt: { xs: 3, sm: 4 } }}>
+                <Box sx={{ p: { xs: 2, sm: 3 } }}>
                   <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
                     User Information
                   </Typography>
                   
                   <Divider sx={{ mb: 3 }} />
                   
-                  <Grid container spacing={3}>
+                  <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
                     <Grid item xs={12} md={6}>
-                      <List>
-                        <ListItem>
-                          <ListItemIcon>
-                            <EmailIcon color="primary" />
-                          </ListItemIcon>
+                      <List sx={{ 
+                        display: 'flex', 
+                        flexDirection: { xs: 'column', md: 'column' },
+                        width: '100%'
+                      }}>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            width: { xs: '100%', sm: 'auto' },
+                            mb: { xs: 1, sm: 0 }
+                          }}>
+                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                              <EmailIcon color="primary" />
+                            </ListItemIcon>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                display: { xs: 'block', sm: 'none' },
+                                fontWeight: 600
+                              }}
+                            >
+                              Email
+                            </Typography>
+                          </Box>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -419,19 +485,44 @@ export default function Profile() {
                               onChange={handleInputChange}
                               disabled={true}
                               label="Email"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="Email" 
                               secondary={userDetails.email || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0 }}
                             />
                           )}
                         </ListItem>
                         
-                        <ListItem>
-                          <ListItemIcon>
-                            <CakeIcon color="primary" />
-                          </ListItemIcon>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            width: { xs: '100%', sm: 'auto' },
+                            mb: { xs: 1, sm: 0 }
+                          }}>
+                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                              <CakeIcon color="primary" />
+                            </ListItemIcon>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                display: { xs: 'block', sm: 'none' },
+                                fontWeight: 600
+                              }}
+                            >
+                              Birthday
+                            </Typography>
+                          </Box>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -440,19 +531,44 @@ export default function Profile() {
                               value={formData.dob || ''}
                               onChange={handleInputChange}
                               label="Date of Birth"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="Birthday" 
                               secondary={userDetails.dob || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0 }}
                             />
                           )}
                         </ListItem>
                         
-                        <ListItem>
-                          <ListItemIcon>
-                            <LocationOnIcon color="primary" />
-                          </ListItemIcon>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            width: { xs: '100%', sm: 'auto' },
+                            mb: { xs: 1, sm: 0 }
+                          }}>
+                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                              <LocationOnIcon color="primary" />
+                            </ListItemIcon>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                display: { xs: 'block', sm: 'none' },
+                                fontWeight: 600
+                              }}
+                            >
+                              Location
+                            </Typography>
+                          </Box>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -461,11 +577,16 @@ export default function Profile() {
                               value={formData.city || ''}
                               onChange={handleInputChange}
                               label="City"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="Location" 
                               secondary={userDetails.city || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0 }}
                             />
                           )}
                         </ListItem>
@@ -473,8 +594,27 @@ export default function Profile() {
                     </Grid>
                     
                     <Grid item xs={12} md={6}>
-                      <List>
-                        <ListItem>
+                      <List sx={{ 
+                        display: 'flex', 
+                        flexDirection: { xs: 'column', md: 'column' },
+                        width: '100%'
+                      }}>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              display: { xs: 'block', sm: 'none' },
+                              fontWeight: 600,
+                              mb: 1,
+                              width: '100%'
+                            }}
+                          >
+                            Username
+                          </Typography>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -484,16 +624,36 @@ export default function Profile() {
                               onChange={handleInputChange}
                               disabled={true}
                               label="Username"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="Username" 
                               secondary={userDetails.username || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0, width: '100%' }}
                             />
                           )}
                         </ListItem>
                         
-                        <ListItem>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              display: { xs: 'block', sm: 'none' },
+                              fontWeight: 600,
+                              mb: 1,
+                              width: '100%'
+                            }}
+                          >
+                            First Name
+                          </Typography>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -502,16 +662,36 @@ export default function Profile() {
                               value={formData.firstName || ''}
                               onChange={handleInputChange}
                               label="First Name"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="First Name" 
                               secondary={userDetails.firstName || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0, width: '100%' }}
                             />
                           )}
                         </ListItem>
                         
-                        <ListItem>
+                        <ListItem sx={{ 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          py: { xs: 1.5, sm: 1 }
+                        }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              display: { xs: 'block', sm: 'none' },
+                              fontWeight: 600,
+                              mb: 1,
+                              width: '100%'
+                            }}
+                          >
+                            Last Name
+                          </Typography>
                           {isEditing ? (
                             <TextField
                               fullWidth
@@ -520,11 +700,16 @@ export default function Profile() {
                               value={formData.lastName || ''}
                               onChange={handleInputChange}
                               label="Last Name"
+                              sx={{ width: { xs: '100%', sm: 'auto', md: '100%' } }}
                             />
                           ) : (
                             <ListItemText 
                               primary="Last Name" 
                               secondary={userDetails.lastName || "Not provided"} 
+                              primaryTypographyProps={{ 
+                                sx: { display: { xs: 'none', sm: 'block' } }
+                              }}
+                              sx={{ margin: 0, width: '100%' }}
                             />
                           )}
                         </ListItem>
@@ -534,8 +719,7 @@ export default function Profile() {
                 </Box>
               </Card>
               
-              {/* Posts section removed */}
-            </Container>
+              {/* Posts section could be added here */}
           </Container>
         </>
       ) : (
@@ -543,10 +727,11 @@ export default function Profile() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: "30px",
+            gap: { xs: "15px", sm: "20px", md: "30px" },
             justifyContent: "center",
             alignItems: "center",
             height: "100vh",
+            p: 2
           }}
         >
           <CircularProgress />
