@@ -28,7 +28,6 @@ import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { getProfile, getMyInfo, areFriend, sendFriendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend } from "../services/userService";
 import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import { isAuthenticated, logOut } from "../services/authenticationService";
-// Post component import removed
 import Scene from "./Scene";
 
 export default function UserProfile() {
@@ -50,10 +49,6 @@ export default function UserProfile() {
     message: '',
     severity: 'success'
   });
-  
-  // Removed posts state
-  
-
 
   const checkIfOwnProfile = async () => {
     try {
@@ -97,148 +92,136 @@ export default function UserProfile() {
       if (result && result.currentUserId) {
         await checkFriendshipStatus(result.currentUserId);
       }
-      
-      // Posts section removed
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("Error fetching user details:", error);
       if (error.response?.status === 401) {
         logOut();
         navigate("/login");
+      } else if (error.response?.status === 404) {
+        setError("User not found");
       } else {
-        setError("Failed to load user profile. Please try again later.");
+        setError("Failed to load user profile");
       }
     } finally {
       setLoading(false);
     }
   };
   
-  // Removed fetchUserPosts function
-  
   const checkFriendshipStatus = async (currentUserId) => {
     try {
-      // Use the passed currentUserId parameter instead of relying on state
-      const userIdToCheck = currentUserId || myId;
-      
-      if (!userIdToCheck || !userId) return;
-      
-      const response = await areFriend(userIdToCheck, userId);
+      const response = await areFriend(currentUserId, userId);
       const data = response.data;
       
       if (data.result) {
-        // Set relationship type based on API response
-        setRelationshipType(data.result.relationshipType);
+        const relationship = data.result;
         
-        // Check if current user is the sender of the friend request
-        if (data.result.relationshipType === 'SENT_FRIEND_REQUEST') {
-          const isSenderOfRequest = data.result.sender.id === userIdToCheck;
-          setIsSender(isSenderOfRequest);
+        if (relationship.status === 'FRIEND') {
+          setRelationshipType('FRIEND');
+        } else if (relationship.status === 'PENDING') {
+          setRelationshipType('SENT_FRIEND_REQUEST');
+          // Check if the current user is the sender of the request
+          setIsSender(relationship.senderId.toString() === currentUserId.toString());
+        } else {
+          setRelationshipType(null);
         }
       } else {
-        // No relationship exists
         setRelationshipType(null);
-        setIsSender(false);
       }
-      return data.result;
     } catch (error) {
-      console.error("Error checking relationship status:", error);
+      console.error("Error checking friendship status:", error);
       setRelationshipType(null);
-      setIsSender(false);
-      return false;
     }
   };
-  
+
   const handleSendFriendRequest = async () => {
     try {
       await sendFriendRequest(userId);
-      // Update relationship status
       setRelationshipType('SENT_FRIEND_REQUEST');
       setIsSender(true);
       setSnackbar({
         open: true,
-        message: 'Friend request sent successfully!',
+        message: 'Friend request sent successfully',
         severity: 'success'
       });
     } catch (error) {
       console.error("Error sending friend request:", error);
       setSnackbar({
         open: true,
-        message: 'Failed to send friend request. Please try again.',
+        message: 'Failed to send friend request',
         severity: 'error'
       });
     }
   };
-  
+
   const handleCancelFriendRequest = async () => {
     try {
       setFriendRequestCancelling(true);
       await cancelFriendRequest(userId);
-      // Reset relationship status
       setRelationshipType(null);
       setIsSender(false);
-      setFriendRequestCancelling(false);
       setSnackbar({
         open: true,
-        message: 'Friend request cancelled successfully!',
+        message: 'Friend request cancelled',
         severity: 'success'
       });
     } catch (error) {
       console.error("Error cancelling friend request:", error);
-      setFriendRequestCancelling(false);
       setSnackbar({
         open: true,
-        message: 'Failed to cancel friend request. Please try again.',
+        message: 'Failed to cancel friend request',
         severity: 'error'
       });
+    } finally {
+      setFriendRequestCancelling(false);
     }
   };
-  
+
   const handleAcceptFriendRequest = async () => {
     try {
       setFriendRequestProcessing(true);
       await acceptFriendRequest(userId);
-      // Update relationship status
       setRelationshipType('FRIEND');
-      setFriendRequestProcessing(false);
+      setIsSender(false);
       setSnackbar({
         open: true,
-        message: 'Friend request accepted!',
+        message: 'Friend request accepted',
         severity: 'success'
       });
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      setFriendRequestProcessing(false);
       setSnackbar({
         open: true,
-        message: 'Failed to accept friend request. Please try again.',
+        message: 'Failed to accept friend request',
         severity: 'error'
       });
+    } finally {
+      setFriendRequestProcessing(false);
     }
   };
-  
+
   const handleRejectFriendRequest = async () => {
     try {
       setFriendRequestProcessing(true);
       await rejectFriendRequest(userId);
-      // Reset relationship status
       setRelationshipType(null);
       setIsSender(false);
-      setFriendRequestProcessing(false);
       setSnackbar({
         open: true,
-        message: 'Friend request rejected.',
+        message: 'Friend request rejected',
         severity: 'success'
       });
     } catch (error) {
       console.error("Error rejecting friend request:", error);
-      setFriendRequestProcessing(false);
       setSnackbar({
         open: true,
-        message: 'Failed to reject friend request. Please try again.',
+        message: 'Failed to reject friend request',
         severity: 'error'
       });
+    } finally {
+      setFriendRequestProcessing(false);
     }
   };
-  
+
   const handleCloseSnackbar = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
@@ -249,18 +232,18 @@ export default function UserProfile() {
     } else if (userId) {
       getUserDetails();
     }
-  }, [navigate, userId]);
+  }, [userId]);
 
   const renderField = (label, value) => {
     return (
-      <Grid container spacing={1} sx={{ py: 1 }}>
-        <Grid item xs={4}>
-          <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{label}</Typography>
-        </Grid>
-        <Grid item xs={8}>
-          <Typography sx={{ fontSize: 14 }}>{value || "-"}</Typography>
-        </Grid>
-      </Grid>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {label}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {value || "Not provided"}
+        </Typography>
+      </Box>
     );
   };
   
@@ -269,9 +252,7 @@ export default function UserProfile() {
     try {
       setRemovingFriend(true);
       await removeFriend(userId);
-      // Reset relationship status
       setRelationshipType(null);
-      setRemovingFriend(false);
       setSnackbar({
         open: true,
         message: 'Friend removed successfully',
@@ -279,12 +260,13 @@ export default function UserProfile() {
       });
     } catch (error) {
       console.error("Error removing friend:", error);
-      setRemovingFriend(false);
       setSnackbar({
         open: true,
-        message: 'Failed to remove friend. Please try again.',
+        message: 'Failed to remove friend',
         severity: 'error'
       });
+    } finally {
+      setRemovingFriend(false);
     }
   };
 
@@ -530,221 +512,235 @@ export default function UserProfile() {
             
             {/* Profile Content */}
             {/* User Information Card */}
-              <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', mt: { xs: 3, sm: 4 } }}>
-                <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                    User Information
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <List sx={{ 
-                        display: 'flex', 
-                        flexDirection: { xs: 'column', md: 'column' },
-                        width: '100%'
+            <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', mt: { xs: 3, sm: 4 } }}>
+              <Box sx={{ p: { xs: 2, sm: 3 } }}>
+                <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                  User Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <List sx={{ 
+                      display: 'flex', 
+                      flexDirection: { xs: 'column', md: 'column' },
+                      width: '100%'
+                    }}>
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
                       }}>
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          width: { xs: '100%', sm: 'auto' },
+                          mb: { xs: 1, sm: 0 }
                         }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            width: { xs: '100%', sm: 'auto' },
-                            mb: { xs: 1, sm: 0 }
-                          }}>
-                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
-                              <EmailIcon color="primary" />
-                            </ListItemIcon>
-                            <Typography 
-                              variant="body1" 
-                              sx={{ 
-                                display: { xs: 'block', sm: 'none' },
-                                fontWeight: 600
-                              }}
-                            >
-                              Email
-                            </Typography>
-                          </Box>
-                          <ListItemText 
-                            primary="Email" 
-                            secondary={userDetails.email || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
+                          <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                            <EmailIcon color="primary" />
+                          </ListItemIcon>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              display: { xs: 'block', sm: 'none' },
+                              fontWeight: 600
                             }}
-                            sx={{ margin: 0 }}
-                          />
-                        </ListItem>
-                        
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
-                        }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            width: { xs: '100%', sm: 'auto' },
-                            mb: { xs: 1, sm: 0 }
-                          }}>
-                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
-                              <CakeIcon color="primary" />
-                            </ListItemIcon>
-                            <Typography 
-                              variant="body1" 
-                              sx={{ 
-                                display: { xs: 'block', sm: 'none' },
-                                fontWeight: 600
-                              }}
-                            >
-                              Birthday
-                            </Typography>
-                          </Box>
-                          <ListItemText 
-                            primary="Birthday" 
-                            secondary={userDetails.dob || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
-                            }}
-                            sx={{ margin: 0 }}
-                          />
-                        </ListItem>
-                        
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
-                        }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            width: { xs: '100%', sm: 'auto' },
-                            mb: { xs: 1, sm: 0 }
-                          }}>
-                            <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
-                              <LocationOnIcon color="primary" />
-                            </ListItemIcon>
-                            <Typography 
-                              variant="body1" 
-                              sx={{ 
-                                display: { xs: 'block', sm: 'none' },
-                                fontWeight: 600
-                              }}
-                            >
-                              Location
-                            </Typography>
-                          </Box>
-                          <ListItemText 
-                            primary="Location" 
-                            secondary={userDetails.city || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
-                            }}
-                            sx={{ margin: 0 }}
-                          />
-                        </ListItem>
-                      </List>
-                    </Grid>
-                    
-                    <Grid item xs={12} md={6}>
-                      <List sx={{ 
-                        display: 'flex', 
-                        flexDirection: { xs: 'column', md: 'column' },
-                        width: '100%'
+                          >
+                            Email
+                          </Typography>
+                        </Box>
+                        <ListItemText 
+                          primary="Email" 
+                          secondary={userDetails.email || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0 }}
+                        />
+                      </ListItem>
+                      
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
                       }}>
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          width: { xs: '100%', sm: 'auto' },
+                          mb: { xs: 1, sm: 0 }
                         }}>
+                          <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                            <CakeIcon color="primary" />
+                          </ListItemIcon>
                           <Typography 
                             variant="body1" 
                             sx={{ 
                               display: { xs: 'block', sm: 'none' },
-                              fontWeight: 600,
-                              mb: 1,
-                              width: '100%'
+                              fontWeight: 600
                             }}
                           >
-                            Username
+                            Birthday
                           </Typography>
-                          <ListItemText 
-                            primary="Username" 
-                            secondary={userDetails.username || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
-                            }}
-                            sx={{ margin: 0, width: '100%' }}
-                          />
-                        </ListItem>
-                        
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
+                        </Box>
+                        <ListItemText 
+                          primary="Birthday" 
+                          secondary={userDetails.dob || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0 }}
+                        />
+                      </ListItem>
+                      
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
+                      }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          width: { xs: '100%', sm: 'auto' },
+                          mb: { xs: 1, sm: 0 }
                         }}>
+                          <ListItemIcon sx={{ minWidth: { xs: '40px', sm: '56px' } }}>
+                            <LocationOnIcon color="primary" />
+                          </ListItemIcon>
                           <Typography 
                             variant="body1" 
                             sx={{ 
                               display: { xs: 'block', sm: 'none' },
-                              fontWeight: 600,
-                              mb: 1,
-                              width: '100%'
+                              fontWeight: 600
                             }}
                           >
-                            First Name
+                            Location
                           </Typography>
-                          <ListItemText 
-                            primary="First Name" 
-                            secondary={userDetails.firstName || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
-                            }}
-                            sx={{ margin: 0, width: '100%' }}
-                          />
-                        </ListItem>
-                        
-                        <ListItem sx={{ 
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          py: { xs: 1.5, sm: 1 }
-                        }}>
-                          <Typography 
-                            variant="body1" 
-                            sx={{ 
-                              display: { xs: 'block', sm: 'none' },
-                              fontWeight: 600,
-                              mb: 1,
-                              width: '100%'
-                            }}
-                          >
-                            Last Name
-                          </Typography>
-                          <ListItemText 
-                            primary="Last Name" 
-                            secondary={userDetails.lastName || "Not provided"} 
-                            primaryTypographyProps={{ 
-                              sx: { display: { xs: 'none', sm: 'block' } }
-                            }}
-                            sx={{ margin: 0, width: '100%' }}
-                          />
-                        </ListItem>
-                      </List>
-                    </Grid>
+                        </Box>
+                        <ListItemText 
+                          primary="Location" 
+                          secondary={userDetails.city || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0 }}
+                        />
+                      </ListItem>
+                    </List>
                   </Grid>
-                </Box>
-              </Card>
-            </Container>
+                  
+                  <Grid item xs={12} md={6}>
+                    <List sx={{ 
+                      display: 'flex', 
+                      flexDirection: { xs: 'column', md: 'column' },
+                      width: '100%'
+                    }}>
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
+                      }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            display: { xs: 'block', sm: 'none' },
+                            fontWeight: 600,
+                            mb: 1,
+                            width: '100%'
+                          }}
+                        >
+                          Username
+                        </Typography>
+                        <ListItemText 
+                          primary="Username" 
+                          secondary={userDetails.username || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0, width: '100%' }}
+                        />
+                      </ListItem>
+                      
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
+                      }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            display: { xs: 'block', sm: 'none' },
+                            fontWeight: 600,
+                            mb: 1,
+                            width: '100%'
+                          }}
+                        >
+                          First Name
+                        </Typography>
+                        <ListItemText 
+                          primary="First Name" 
+                          secondary={userDetails.firstName || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0, width: '100%' }}
+                        />
+                      </ListItem>
+                      
+                      <ListItem sx={{ 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        py: { xs: 1.5, sm: 1 }
+                      }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            display: { xs: 'block', sm: 'none' },
+                            fontWeight: 600,
+                            mb: 1,
+                            width: '100%'
+                          }}
+                        >
+                          Last Name
+                        </Typography>
+                        <ListItemText 
+                          primary="Last Name" 
+                          secondary={userDetails.lastName || "Not provided"} 
+                          primaryTypographyProps={{ 
+                            sx: { display: { xs: 'none', sm: 'block' } }
+                          }}
+                          sx={{ margin: 0, width: '100%' }}
+                        />
+                      </ListItem>
+                    </List>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Card>
+          </Container>
         </>
-      ) : null}
-      
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: { xs: "15px", sm: "20px", md: "30px" },
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            p: 2
+          }}
+        >
+          <CircularProgress />
+          <Typography>Loading ...</Typography>
+        </Box>
+      )}
       <Snackbar 
         open={snackbar.open} 
-        {...snackbar}
+        autoHideDuration={6000} 
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
           {snackbar.message}
         </Alert>
       </Snackbar>

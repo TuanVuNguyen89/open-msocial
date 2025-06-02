@@ -1,6 +1,9 @@
 import React from 'react';
-import { Box, CircularProgress, Typography, IconButton } from '@mui/material';
+import { Box, CircularProgress, Typography, IconButton, Tooltip } from '@mui/material';
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PublicIcon from "@mui/icons-material/Public";
+import PeopleIcon from "@mui/icons-material/People";
+import LockIcon from "@mui/icons-material/Lock";
 import Post from './Post';
 
 const PostsList = ({ 
@@ -18,16 +21,39 @@ const PostsList = ({
         const isCurrentUserPost = post.user && post.user.id === currentUserId;
         
         return (
-          <Box key={post.id} sx={{ position: "relative" }}>
-            <Post 
-              ref={isLastPost ? lastPostElementRef : null} 
-              post={post} 
-            />
+          <Box key={post.id} sx={{ position: "relative", width: "100%" }}>
+            {isLastPost ? (
+              <div ref={lastPostElementRef}>
+                <Post post={post} />
+              </div>
+            ) : (
+              <Post post={post} />
+            )}
+            {/* Display visibility icon */}
+            {post.visibility && (
+              <Tooltip title={post.visibility.toLowerCase()} placement="top">
+                <Box sx={{ position: "absolute", top: { xs: 10, sm: 15 }, right: isCurrentUserPost ? { xs: 40, sm: 45 } : { xs: 10, sm: 15 } }}>
+                  {post.visibility.toLowerCase() === "public" ? (
+                    <PublicIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                  ) : post.visibility.toLowerCase() === "friends" ? (
+                    <PeopleIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                  ) : (
+                    <LockIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                  )}
+                </Box>
+              </Tooltip>
+            )}
+            
             {/* Only show edit/delete menu for the current user's posts */}
             {isCurrentUserPost && (
               <IconButton 
                 size="small" 
-                sx={{ position: "absolute", top: 10, right: 10 }}
+                sx={{ 
+                  position: "absolute", 
+                  top: { xs: 5, sm: 10 }, 
+                  right: { xs: 5, sm: 10 },
+                  padding: { xs: 0.5, sm: 1 }
+                }}
                 onClick={(e) => handlePostMenuOpen(e, post.id)}
                 aria-label="post-actions"
               >

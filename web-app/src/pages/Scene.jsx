@@ -9,7 +9,7 @@ import { useTheme } from "@mui/material";
 import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
 
-const drawerWidth = 300;
+const drawerWidth = 280;
 
 function Scene({ children }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -37,6 +37,9 @@ function Scene({ children }) {
       sx={{
         display: "flex",
         flexDirection: "column",
+        minHeight: '100vh',
+        width: '100%',
+        overflow: 'hidden',
       }}
     >
       <AppBar
@@ -63,6 +66,8 @@ function Scene({ children }) {
         sx={{
           display: "flex",
           flexDirection: "row",
+          width: '100%',
+          flexGrow: 1,
         }}
       >
         <Box
@@ -106,8 +111,10 @@ function Scene({ children }) {
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
+            p: { xs: 1, sm: 2, md: 3 },
             width: { sm: `calc(100% - ${drawerWidth}px)` },
+            maxWidth: '100%',
+            overflowX: 'hidden'
           }}
         >
           <Toolbar />
@@ -115,7 +122,8 @@ function Scene({ children }) {
             sx={{
               display: 'flex',
               justifyContent: 'center',
-              width: '100%'
+              width: '100%',
+              maxWidth: '100%'
             }}
           >
             {children}

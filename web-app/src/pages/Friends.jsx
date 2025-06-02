@@ -290,11 +290,11 @@ export default function Friends() {
       <Box
         sx={{
           position: 'relative',
-          height: '120px',
+          height: { xs: '100px', sm: '120px' },
           width: '100%',
           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           overflow: 'hidden',
-          mb: -8,
+          mb: { xs: -6, sm: -8 },
           zIndex: 0,
           '&::before': {
             content: '""',
@@ -309,8 +309,11 @@ export default function Friends() {
         }}
       >
         <Container maxWidth="lg">
-          <Box sx={{ pt: 4, color: 'white', position: 'relative', zIndex: 1 }}>
-            <Typography variant="h4" fontWeight="bold" sx={{ textShadow: '0px 2px 4px rgba(0,0,0,0.3)' }}>
+          <Box sx={{ pt: { xs: 2, sm: 4 }, color: 'white', position: 'relative', zIndex: 1 }}>
+            <Typography variant="h4" fontWeight="bold" sx={{ 
+              textShadow: '0px 2px 4px rgba(0,0,0,0.3)',
+              fontSize: { xs: '1.75rem', sm: '2.125rem' }
+            }}>
               {isOwnFriendsList ? 'My Friends' : 'User\'s Friends'}
             </Typography>
           </Box>
@@ -339,14 +342,14 @@ export default function Friends() {
         }} />
       </Box>
       
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, px: { xs: 2, sm: 3, md: 4 } }}>
         <Card
           elevation={8}
           sx={{
-            minWidth: 350,
+            minWidth: { xs: '100%', sm: 350 },
             width: '100%',
             margin: "auto",
-            borderRadius: 4,
+            borderRadius: { xs: 2, sm: 4 },
             overflow: 'visible',
             position: 'relative',
             pb: 3
@@ -355,7 +358,7 @@ export default function Friends() {
           {/* Loại bỏ các nút action không cần thiết */}
           
           {/* Tabs navigation - Chỉ hiển thị tab Friend Requests khi xem danh sách bạn bè của chính mình */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 } }}>
             <Tabs 
               value={activeTab} 
               onChange={handleTabChange} 
@@ -367,21 +370,31 @@ export default function Friends() {
                 icon={<PeopleAltIcon />} 
                 label="All Friends" 
                 iconPosition="start" 
-                sx={{ fontWeight: 'medium' }} 
+                sx={{ 
+                  fontWeight: 'medium',
+                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                  minHeight: { xs: 48, sm: 'auto' },
+                  px: { xs: 1, sm: 2 }
+                }} 
               />
               {isOwnFriendsList && (
                 <Tab 
                   icon={<PersonAddIcon />} 
                   label="Friend Requests" 
                   iconPosition="start" 
-                  sx={{ fontWeight: 'medium' }} 
+                  sx={{ 
+                    fontWeight: 'medium',
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    minHeight: { xs: 48, sm: 'auto' },
+                    px: { xs: 1, sm: 2 }
+                  }} 
                 />
               )}
             </Tabs>
           </Box>
           
           {/* Hiển thị số lượng bạn bè hoặc lời mời kết bạn */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 1.5, sm: 2 } }}>
             <Typography variant="subtitle1" fontWeight="medium">
               {activeTab === 0 ? (
                 <>{friends.length} {friends.length === 1 ? 'Friend' : 'Friends'}</>
@@ -391,7 +404,7 @@ export default function Friends() {
             </Typography>
           </Box>
 
-        <Box sx={{ px: 3 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 } }}>
           {/* Tab content - Hiển thị nội dung tương ứng với tab đang chọn */}
           {activeTab === 0 ? (
             // Tab All Friends
@@ -455,33 +468,34 @@ export default function Friends() {
             <>
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 {friends.map((friend, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`${friend.id}-${index}`}>
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={`${friend.id}-${index}`}>
                     <Paper
                       ref={index === friends.length - 1 ? lastFriendElementRef : null}
                       elevation={2}
                       sx={{ 
-                        p: 2, 
-                        borderRadius: 3,
+                        p: { xs: 1.5, sm: 2 }, 
+                        borderRadius: { xs: 2, sm: 3 },
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
                         '&:hover': { 
-                          transform: 'translateY(-4px)',
+                          transform: { xs: 'none', sm: 'translateY(-4px)' },
                           boxShadow: 6,
                           bgcolor: alpha(theme.palette.primary.main, 0.03)
                         },
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        height: '100%'
+                        height: '100%',
+                        touchAction: 'manipulation'
                       }}
                       onClick={() => handleViewProfile(friend.id)}
                     >
                       <Avatar 
                         src={formatAvatarUrl(friend.avatarUrl)}
                         sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          mb: 2,
+                          width: { xs: 60, sm: 80 }, 
+                          height: { xs: 60, sm: 80 }, 
+                          mb: { xs: 1.5, sm: 2 },
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                       >
@@ -597,12 +611,12 @@ export default function Friends() {
             <>
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 {pendingRequests.map((request, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`request-${request.id}-${index}`}>
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={`request-${request.id}-${index}`}>
                     <Paper
                       elevation={2}
                       sx={{ 
-                        p: 2, 
-                        borderRadius: 3,
+                        p: { xs: 1.5, sm: 2 }, 
+                        borderRadius: { xs: 2, sm: 3 },
                         transition: 'all 0.3s ease',
                         '&:hover': { 
                           boxShadow: 6,
@@ -617,9 +631,9 @@ export default function Friends() {
                       <Avatar 
                         src={request.avatarUrl}
                         sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          mb: 2,
+                          width: { xs: 60, sm: 80 }, 
+                          height: { xs: 60, sm: 80 }, 
+                          mb: { xs: 1.5, sm: 2 },
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                       >
@@ -645,28 +659,46 @@ export default function Friends() {
                         @{request.username}
                       </Typography>
                       
-                      <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, mt: 'auto', flexWrap: { xs: 'wrap', sm: 'nowrap' }, justifyContent: 'center' }}>
                         <Button 
                           variant="contained" 
                           size="small" 
-                          onClick={() => handleAcceptRequest(request.id)}
-                          sx={{ borderRadius: 4 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAcceptRequest(request.id);
+                          }}
+                          sx={{ 
+                            borderRadius: 4,
+                            fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+                            py: { xs: 0.5 },
+                            px: { xs: 1, sm: 2 },
+                            minWidth: { xs: '65px', sm: '64px' }
+                          }}
                         >
                           Accept
                         </Button>
                         <Button 
                           variant="outlined" 
                           size="small" 
-                          onClick={() => handleRejectRequest(request.id)}
-                          sx={{ borderRadius: 4 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRejectRequest(request.id);
+                          }}
+                          sx={{ 
+                            borderRadius: 4,
+                            fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+                            py: { xs: 0.5 },
+                            px: { xs: 1, sm: 2 },
+                            minWidth: { xs: '65px', sm: '64px' }
+                          }}
                         >
                           Decline
                         </Button>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
+                    </Box>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
               
               {/* Loading indicator at the bottom */}
               {loadingRequests && pendingRequests.length > 0 && (

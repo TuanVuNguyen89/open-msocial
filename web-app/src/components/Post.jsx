@@ -1,5 +1,5 @@
 import { Box, Avatar, Typography, Card, Paper } from "@mui/material";
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import 'katex/dist/katex.min.css';
@@ -94,7 +94,7 @@ const renderContent = (text) => {
   );
 };
 
-const Post = forwardRef((props, ref) => {
+const Post = (props) => {
   const { content, created, createdDate, visibility, id: postId } = props.post;
   const user = props.post.user || {};
   const { avatarUrl, username, id: userId } = user;
@@ -133,13 +133,13 @@ const Post = forwardRef((props, ref) => {
   
   return (
     <Card
-      ref={ref}
       sx={{
         width: "100%",
-        padding: 3,
+        padding: { xs: 2, sm: 3 },
         marginBottom: 3,
         boxShadow: 2,
         borderRadius: 2,
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -152,20 +152,31 @@ const Post = forwardRef((props, ref) => {
         <Avatar 
           src={formatAvatarUrl(avatarUrl)} 
           sx={{ 
-            marginRight: 2,
+            marginRight: { xs: 1, sm: 2 },
             cursor: "pointer",
+            width: { xs: 32, sm: 40 },
+            height: { xs: 32, sm: 40 },
           }} 
           onClick={handleUserClick}
         >
           {!avatarUrl && getUserInitials(user)}
         </Avatar>
         <Box sx={{ width: "100%" }}>
-          <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", alignItems: "center", width: "100%", pr: 4 }}>
+          <Box sx={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: { xs: "5px", sm: "10px" }, 
+            alignItems: "center", 
+            width: "100%", 
+            pr: { xs: 2, sm: 4 },
+            flexWrap: "wrap",
+          }}>
             <Typography
               sx={{
-                fontSize: 14,
+                fontSize: { xs: 13, sm: 14 },
                 fontWeight: 600,
                 cursor: "pointer",
+                mr: 1,
               }}
               onClick={handleUserClick}
             >
@@ -173,43 +184,36 @@ const Post = forwardRef((props, ref) => {
             </Typography>
             <Typography
               sx={{
-                fontSize: 12,
+                fontSize: { xs: 11, sm: 12 },
                 fontWeight: 400,
                 color: "text.secondary",
+                lineHeight: 1.5,
               }}
             >
               {formattedDate}
             </Typography>
-            {visibility && (
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: "text.secondary",
-                  marginLeft: "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                }}
-              >
-                {visibility.toLowerCase()}
-              </Typography>
-            )}
+
           </Box>
           <Box
             sx={{
-              fontSize: 14,
+              fontSize: { xs: 13, sm: 14 },
               marginTop: 1,
-              '& p': { margin: '0.5em 0' },
-              '& h1': { fontSize: '1.5em', fontWeight: 'bold', margin: '0.5em 0' },
-              '& h2': { fontSize: '1.3em', fontWeight: 'bold', margin: '0.5em 0' },
-              '& h3': { fontSize: '1.1em', fontWeight: 'bold', margin: '0.5em 0' },
-              '& ul, & ol': { paddingLeft: '1.5em', margin: '0.5em 0' },
-              '& blockquote': { borderLeft: '3px solid #ccc', paddingLeft: '1em', margin: '0.5em 0' },
-              '& code': { fontFamily: 'monospace', backgroundColor: 'rgba(0,0,0,0.05)', padding: '0.1em 0.3em', borderRadius: '3px' },
-              '& a': { color: 'primary.main', textDecoration: 'none' },
-              '& img': { maxWidth: '100%', height: 'auto' },
-              '& table': { borderCollapse: 'collapse', width: '100%', margin: '0.5em 0' },
-              '& th, & td': { border: '1px solid #ddd', padding: '0.5em' },
+              overflowWrap: 'break-word',
+              wordBreak: 'break-word',
+              maxWidth: '100%',
+              boxSizing: 'border-box',
+              '& p': { margin: '0.5em 0', maxWidth: '100%' },
+              '& h1': { fontSize: { xs: '1.3em', sm: '1.5em' }, fontWeight: 'bold', margin: '0.5em 0', maxWidth: '100%' },
+              '& h2': { fontSize: { xs: '1.1em', sm: '1.3em' }, fontWeight: 'bold', margin: '0.5em 0', maxWidth: '100%' },
+              '& h3': { fontSize: { xs: '1em', sm: '1.1em' }, fontWeight: 'bold', margin: '0.5em 0', maxWidth: '100%' },
+              '& ul, & ol': { paddingLeft: '1.5em', margin: '0.5em 0', maxWidth: '100%' },
+              '& blockquote': { borderLeft: '3px solid #ccc', paddingLeft: '1em', margin: '0.5em 0', maxWidth: '100%' },
+              '& code': { fontFamily: 'monospace', backgroundColor: 'rgba(0,0,0,0.05)', padding: '0.1em 0.3em', borderRadius: '3px', fontSize: { xs: '0.85em', sm: '1em' }, overflowX: 'auto', display: 'inline-block', maxWidth: '100%' },
+              '& pre': { overflowX: 'auto', maxWidth: '100%', whiteSpace: 'pre-wrap' },
+              '& a': { color: 'primary.main', textDecoration: 'none', wordBreak: 'break-all' },
+              '& img': { maxWidth: '100%', height: 'auto', display: 'block' },
+              '& table': { borderCollapse: 'collapse', width: '100%', margin: '0.5em 0', display: { xs: 'block', sm: 'table' }, overflowX: 'auto', tableLayout: 'fixed' },
+              '& th, & td': { border: '1px solid #ddd', padding: { xs: '0.3em', sm: '0.5em' }, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' },
               '& th': { backgroundColor: 'rgba(0,0,0,0.05)' },
             }}
           >
@@ -224,6 +228,6 @@ const Post = forwardRef((props, ref) => {
       </Box>
     </Card>
   );
-});
+};
 
 export default Post;

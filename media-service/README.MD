@@ -6,10 +6,6 @@ The **Media Feature** allows users to upload, view, and manage media files (imag
 
 ## ⚙️ Technologies Used
 
-- **React**: JavaScript library for building user interfaces
-- **Material UI**: UI framework for components
-- **React Router**: Navigation management in the application
-- **Axios**: Handling HTTP requests to the API
 - **Cloudinary SDK**: Client-side integration with Cloudinary services
 
 ## 🧩 Data Model

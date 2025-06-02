@@ -86,7 +86,13 @@ export default function Home() {
 
   return (
     <Scene>
-      <Box sx={{ maxWidth: 700, width: "100%", mx: "auto" }}>
+      <Box sx={{
+        maxWidth: 700,
+        width: "100%",
+        mx: "auto",
+        px: { xs: 1, sm: 2, md: 3 },
+        boxSizing: 'border-box'
+      }}>
         {/* Post creation card */}
         <Card sx={{ mb: 4, boxShadow: 3, borderRadius: 2 }}>
           <PostCreationForm
