@@ -64,7 +64,18 @@ export default function FriendSuggestions() {
       });
       
       const data = response.data;
-      const newSuggestions = data.result.content || [];
+      let newSuggestions = data.result.content || [];
+      
+      // Đảm bảo mỗi suggestion có đủ thông tin cần thiết
+      newSuggestions = newSuggestions.map(suggestion => ({
+        ...suggestion,
+        // Đảm bảo avatarUrl luôn có giá trị đúng định dạng
+        avatarUrl: suggestion.avatarUrl || null,
+        // Đảm bảo firstName, lastName và username luôn có giá trị
+        firstName: suggestion.firstName || '',
+        lastName: suggestion.lastName || '',
+        username: suggestion.username || 'user'
+      }));
       
       // Append new suggestions to existing list for infinite scroll
       setSuggestions(prev => {
@@ -313,7 +324,8 @@ export default function FriendSuggestions() {
                             height: { xs: 60, sm: 80 }, 
                             mb: { xs: 1.5, sm: 2 },
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            bgcolor: !suggestion.avatarUrl ? theme.palette.primary.main : 'inherit'
                           }}
                           onClick={() => handleViewProfile(suggestion.id)}
                         >

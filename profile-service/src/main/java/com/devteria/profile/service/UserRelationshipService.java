@@ -245,6 +245,8 @@ public class UserRelationshipService {
                         .lastName(profile.getLastName())
                         .dob(profile.getDob())
                         .city(profile.getCity())
+                        .backgroundUrl(profile.getBackgroundUrl())
+                        .avatarUrl(profile.getAvatarUrl())
                         .build())
                 .stream()
                 .toList();

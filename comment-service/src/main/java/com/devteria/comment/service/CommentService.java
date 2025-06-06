@@ -63,6 +63,7 @@ public class CommentService {
                 .user(currentUser)
                 .pUser(parentUser)
                 .rootId(comment.getRootId())
+                .createdAt(comment.getCreatedAt())
                 .id(comment.getId())
                 .content(comment.getContent())
                 .build();
@@ -87,6 +88,7 @@ public class CommentService {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
                 .rootId(comment.getRootId())
                 .user(currentUser)
                 .pUser(parentUser)
@@ -171,6 +173,7 @@ public class CommentService {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .rootId(comment.getRootId())
+                .createdAt(comment.getCreatedAt())
                 .user(user)
                 .pUser(parentUser)
                 .build();
