@@ -1,5 +1,7 @@
 package com.devteria.comment.dto.response;
 
+import java.time.Instant;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,4 +16,5 @@ public class CommentResponse {
     private UserProfileResponse user;
     private UserProfileResponse pUser;
     private String rootId;
+    private Instant createdAt;
 }
