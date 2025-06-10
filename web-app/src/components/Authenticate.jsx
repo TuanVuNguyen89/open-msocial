@@ -8,8 +8,6 @@ export default function Authenticate() {
   const [isLoggedin, setIsLoggedin] = useState(false);
 
   useEffect(() => {
-    console.log(window.location.href);
-
     const authCodeRegex = /code=([^&]+)/;
     const isMatch = window.location.href.match(authCodeRegex);
 
@@ -23,12 +21,9 @@ export default function Authenticate() {
         }
       )
         .then((response) => {
-          console.log("response: ", response);
           return response.json();
         })
         .then((data) => {
-          console.log("data: ", data);
-
           setToken(data.result?.token);
           setIsLoggedin(true);
         });

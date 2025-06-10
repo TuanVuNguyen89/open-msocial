@@ -51,7 +51,7 @@ const CommentItem = ({ comment, onCommentUpdated, onCommentDeleted, onReplyClick
       }
       
       // Sử dụng API mới để tìm kiếm người dùng theo username
-      import('../services/userService')
+      import('../../services/userService')
         .then(async (module) => {
           try {
             const response = await module.searchUserByUsername(username);
